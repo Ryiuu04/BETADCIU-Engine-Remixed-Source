@@ -9,6 +9,7 @@ import flixel.FlxState;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
+import debug.FPSCounter;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
@@ -22,6 +23,7 @@ import haxe.io.Path;
 #end
 
 import states.TitleState;
+import PreloadState;
 
 using StringTools;
 
@@ -29,7 +31,7 @@ class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
+	var initialState:Class<FlxState> = PreloadState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 120; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
@@ -48,6 +50,8 @@ class Main extends Sprite
 	public static var dataJump:Array<Int> = [8, 12, 18];
 	public static var isMegalo:Bool = false;
 	public static var curFPS:Int = 120;
+
+	public static var appName:String = ''; // Application name.
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -97,14 +101,20 @@ class Main extends Sprite
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
 
-		initialState = TitleState;
+		initialState = PreloadState;
 		
 		game = new FlxGame(gameWidth, gameHeight, initialState, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen);
+
+		    // FlxG.game._customSoundTray wants just the class, it calls new from
+		// create() in there, which gets called when it's added to stage
+		// which is why it needs to be added before addChild(game) here
+		@:privateAccess
+		game._customSoundTray = options.FunkinSoundTray;	
 
 		addChild(game);
 
 		#if !mobile
-		fpsCounter = new FPS(10, 3, 0xFFFFFF);
+		fpsCounter = new FPSCounter(3, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -156,7 +166,7 @@ class Main extends Sprite
 	
 	var game:FlxGame;
 
-	public static var fpsCounter:FPS;
+	public static var fpsCounter:FPSCounter;
 
 	public function toggleFPS(fpsEnabled:Bool):Void {
 		fpsCounter.visible = fpsEnabled;

@@ -1,12 +1,12 @@
 package;
 
 import flixel.*;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 /**
  * ...
  * @author bbpanzu
  */
-class RadialBlur extends FlxShader
+class RadialBlur extends FlxRuntimeShader
 {
 
 	@:glFragmentSource('

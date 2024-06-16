@@ -35,7 +35,7 @@ class OptionsMenuKade extends MusicBeatState
 			new PoltatoPCOption("Reduces the size of almost all sprites for better performance."),
 			new PsychUIOption("Toggles between Kade and Psych UI."),
 			#if desktop
-			new FPSCapOption("Cap your FPS"),
+			//new FPSCapOption("Cap your FPS"),
 			new FPSOption("Toggle the FPS Counter"),
 			new RainbowFPSOption("Make the FPS Counter Rainbow"),
 			new AccuracyOption("Display accuracy information."),

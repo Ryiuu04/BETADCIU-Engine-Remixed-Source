@@ -63,7 +63,17 @@ class PauseSubState extends MusicBeatSubstate
 			case 'my-sweets': songLowercase = 'my sweets';
 		}
 
-		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
+		/*pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
+		pauseMusic.volume = 0;
+		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));*/
+
+		pauseMusic = new FlxSound();
+		try
+		{
+			var pauseSong:String = getPauseSong();
+			if(pauseSong != null) pauseMusic.loadEmbedded(Paths.music(pauseSong), true, true);
+		}
+		catch(e:Dynamic) {}
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
 
@@ -116,6 +126,17 @@ class PauseSubState extends MusicBeatSubstate
 
 		regenMenu();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	}
+
+	public static var songName:String = null;
+
+	function getPauseSong()
+	{
+		var formattedSongName:String = (songName != null ? Paths.formatToSongPath(songName) : '');
+		var formattedPauseMusic:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
+		if(formattedSongName == 'none' || (formattedSongName != 'none' && formattedPauseMusic == 'none')) return null;
+
+		return (formattedSongName != '') ? formattedSongName : formattedPauseMusic;
 	}
 
 	var holdTime:Float = 0;
@@ -194,9 +215,9 @@ class PauseSubState extends MusicBeatSubstate
 				case "Resume":
 					close();
 				case "Restart Song":
-					restartSong(true, false);
+					restartSong(true, false, true);
 				case "Restart with Cutscene":
-					restartSong(true, true);
+					restartSong(true, true, false);
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
@@ -204,7 +225,7 @@ class PauseSubState extends MusicBeatSubstate
 					if(curTime < Conductor.songPosition)
 					{
 						PlayState.startOnTime = curTime;
-						restartSong(false, false);
+						restartSong(false, false, false);
 					}
 					else
 					{
@@ -273,7 +294,7 @@ class PauseSubState extends MusicBeatSubstate
 		super.close();
 	}
 
-	public static function restartSong(?useTransition:Bool = true, ?cutscene:Bool = false)
+	public static function restartSong(?useTransition:Bool = true, ?cutscene:Bool = false, ?preloadAgain:Bool = true)
 	{
 		PlayState.instance.paused = true; // For lua
 		PlayState.showCutscene = cutscene;
@@ -283,6 +304,8 @@ class PauseSubState extends MusicBeatSubstate
 
 		if (!cutscene && useTransition)
 			LoadingState.loadAndSwitchState(new states.CustomLoading());
+		else if (!cutscene && useTransition && !preloadAgain)
+			MusicBeatState.resetState();
 		else
 		{	
 			if (!useTransition){

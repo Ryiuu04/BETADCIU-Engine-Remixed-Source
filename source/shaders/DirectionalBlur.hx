@@ -1,12 +1,12 @@
 package;
 
 import flixel.*;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 /**
  * ...
  * @author bbpanzu
  */
-class DirectionalBlur extends FlxShader
+class DirectionalBlur extends FlxRuntimeShader
 {
 	
 	@:glFragmentSource('

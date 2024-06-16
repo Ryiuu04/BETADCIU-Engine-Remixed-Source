@@ -11,6 +11,9 @@ import states.TitleState;
 
 // Add a variable here and it will get automatically saved
 @:structInit class SaveVariables {
+	public var stageChange:Bool = true;
+	public var uncacheCharacterSwitch:Bool = false;
+
 	public var downscroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
@@ -140,6 +143,7 @@ class ClientPrefs {
 		FlxG.save.data.fps = data.showFPS;
 		FlxG.save.data.showFPS = data.showFPS;
 		FlxG.save.data.noteSplash = data.noteSplashes;
+		data.fpsCap = data.framerate;
 		FlxG.save.data.fpsCap = data.framerate;
 		FlxG.save.data.ghost = data.ghostTapping;
 		
@@ -170,8 +174,12 @@ class ClientPrefs {
 		
 		if(FlxG.save.data.fpsCap != null) {
 			var framerate = data.framerate;
+			framerate = FlxG.save.data.framerate;
 
-			framerate = FlxG.save.data.fpsCap;
+			openfl.Lib.current.stage.frameRate = framerate;
+			Main.curFPS = framerate;	
+
+			FlxG.save.data.fpsCap = framerate;
 			if(framerate > FlxG.drawFramerate) {
 				FlxG.updateFramerate = framerate;
 				FlxG.drawFramerate = framerate;

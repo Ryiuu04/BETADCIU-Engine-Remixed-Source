@@ -3,7 +3,7 @@ package shaders;
 // STOLEN FROM HAXEFLIXEL DEMO LOL
 //Am I even allowed to use this?
 import flixel.FlxSprite;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 import openfl.display.BitmapData;
 import openfl.display.Shader;
 import openfl.display.ShaderInput;
@@ -29,7 +29,7 @@ class BuildingEffect {
   }
 }
 
-class BuildingShader extends FlxShader
+class BuildingShader extends FlxRuntimeShader
 {
   @:glFragmentSource('
     #pragma header
@@ -50,7 +50,7 @@ class BuildingShader extends FlxShader
   }
 }
 
-class SketchShader extends FlxShader
+class SketchShader extends FlxRuntimeShader
 {
 	@:glFragmentSource("
 	/* 
@@ -189,7 +189,7 @@ class SketchShader extends FlxShader
 	}
 }
 
-class ChromaticAberrationShader extends FlxShader
+class ChromaticAberrationShader extends FlxRuntimeShader
 {
 	@:glFragmentSource('
 		#pragma header
@@ -258,7 +258,7 @@ class ScanlineEffect extends Effect
 }
 
 
-class Scanline extends FlxShader
+class Scanline extends FlxRuntimeShader
 {
 	@:glFragmentSource('
 		#pragma header
@@ -294,7 +294,7 @@ class TiltshiftEffect extends Effect{
 	
 }
 
-class Tiltshift extends FlxShader
+class Tiltshift extends FlxRuntimeShader
 {
 	@:glFragmentSource('
 		#pragma header
@@ -388,7 +388,7 @@ class GreyscaleEffect extends Effect{
 		
 	}
 }
-class GreyscaleShader extends FlxShader{
+class GreyscaleShader extends FlxRuntimeShader{
 	@:glFragmentSource('
 	#pragma header
 	void main() {
@@ -431,7 +431,7 @@ class OldTVEffect extends Effect {
 	}
 }
 
-class OldTVShader extends FlxShader{
+class OldTVShader extends FlxRuntimeShader{
 	@:glFragmentSource("
         #pragma header
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -663,7 +663,7 @@ class GrainEffect extends Effect {
 }
 
 
-class Grain extends FlxShader
+class Grain extends FlxRuntimeShader
 {
 	@:glFragmentSource('
 		#pragma header
@@ -866,7 +866,7 @@ class VCRDistortionEffect extends Effect
   }
 }
 
-class VCRDistortionShader extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader extends FlxRuntimeShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
 
   @:glFragmentSource('
@@ -1004,7 +1004,7 @@ class VCRDistortionEffect2 extends Effect //the one used for tails doll
 }
 
 
-class VCRDistortionShader2 extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader2 extends FlxRuntimeShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
 
   @:glFragmentSource('
@@ -1151,7 +1151,7 @@ class RGBShiftGlitchEffect extends Effect
 
 }
 
-class RGBShiftGlitchShader extends FlxShader //https://www.shadertoy.com/view/4t23Rc#	
+class RGBShiftGlitchShader extends FlxRuntimeShader //https://www.shadertoy.com/view/4t23Rc#	
 {
 	@glFragmentSource("
 	#pragma header
@@ -1220,7 +1220,7 @@ class ThreeDEffect extends Effect{
 //coding is like hitting on women, you never start with the number
 //               -naether
 
-class ThreeDShader extends FlxShader{
+class ThreeDShader extends FlxRuntimeShader{
 	@:glFragmentSource('
 	#pragma header
 	uniform float xrot = 0.0;
@@ -1316,7 +1316,7 @@ class FuckingTriangleEffect extends Effect{
 }
 
 
-class FuckingTriangle extends FlxShader{
+class FuckingTriangle extends FlxRuntimeShader{
 	
 	@:glFragmentSource('
 	
@@ -1474,7 +1474,7 @@ class BloomEffect extends Effect{
 }
 
 
-class BloomShader extends FlxShader{
+class BloomShader extends FlxRuntimeShader{
 	
 	
 	@:glFragmentSource('
@@ -1727,7 +1727,7 @@ class InvertColorsEffect extends Effect
 
 }
 
-class GlitchShader extends FlxShader
+class GlitchShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -1776,7 +1776,7 @@ class GlitchShader extends FlxShader
     }
 }
 
-class InvertShader extends FlxShader
+class InvertShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -1812,7 +1812,7 @@ class DesaturationEffect extends Effect
 	}
 
 }
-class DesaturationShader extends FlxShader
+class DesaturationShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -1856,7 +1856,7 @@ class FishEyeEffect extends Effect
 	  }
 }
 
-class FishEyeShader extends FlxShader
+class FishEyeShader extends FlxRuntimeShader
 {
 	@:glFragmentSource('
     #pragma header
@@ -1923,7 +1923,7 @@ class OutlineEffect extends Effect
  
 }
 
-class OutlineShader extends FlxShader
+class OutlineShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -1958,7 +1958,7 @@ class OutlineShader extends FlxShader
     }
 }
 
-class DistortBGShader extends FlxShader
+class DistortBGShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -2013,7 +2013,7 @@ class DistortBGShader extends FlxShader
 }
 
 
-class PulseShader extends FlxShader
+class PulseShader extends FlxRuntimeShader
 {
     @:glFragmentSource('
     #pragma header
@@ -2071,7 +2071,7 @@ class PulseShader extends FlxShader
 
 
 class Effect {
-	public function setValue(shader:FlxShader, variable:String, value:Float){
+	public function setValue(shader:FlxRuntimeShader, variable:String, value:Float){
 		Reflect.setProperty(Reflect.getProperty(shader, 'variable'), 'value', [value]);
 	}
 	

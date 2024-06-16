@@ -179,7 +179,7 @@ class BonusSongsState extends MusicBeatState
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		// scoreText.autoSize = false;
-		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
+		scoreText.setFormat(Paths.font("Renogare-Regular.otf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
 		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
@@ -197,13 +197,13 @@ class BonusSongsState extends MusicBeatState
 		add(scoreText);
 
 		infoText = new FlxText(FlxG.width * 0.7, 105, FlxG.height, "", 20);
-		infoText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT);
+		infoText.setFormat(Paths.font("Renogare-Regular.otf"), 20, FlxColor.WHITE, LEFT);
 		infoText.text = 'This song contains copyrighted' 
 		+ '\ncontent. Press P for Alternate'
 		+ '\nInst.';
 
 		copyrightText = new FlxText(FlxG.width * 0.7, 155, FlxG.height, "", 32);
-		copyrightText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT);
+		copyrightText.setFormat(Paths.font("Renogare-Regular.otf"), 32, FlxColor.WHITE, LEFT);
 		if (!Main.noCopyright) 
 			copyrightText.text = '\nAlternate Inst: Off';
 		else 

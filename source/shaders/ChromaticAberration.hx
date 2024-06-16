@@ -1,8 +1,8 @@
 package shaders;
 
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 
-class ChromaticAberration extends FlxShader
+class ChromaticAberration extends FlxRuntimeShader
 {
 	@:glFragmentSource('
 		#pragma header

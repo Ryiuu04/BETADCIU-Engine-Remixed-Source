@@ -12,7 +12,7 @@ import flixel.input.gamepad.FlxGamepad;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
-import flixel.system.ui.FlxSoundTray;
+//import flixel.system.ui.FlxSoundTray;
 import lime.app.Application;
 import openfl.Assets;
 

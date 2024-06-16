@@ -1,7 +1,7 @@
 package shaders;
 
 import flixel.FlxG;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 
 class ColorSwap {
 	public var shader(default, null):ColorSwapShader = new ColorSwapShader();
@@ -34,7 +34,7 @@ class ColorSwap {
 	}
 }
 
-class ColorSwapShader extends FlxShader {
+class ColorSwapShader extends FlxRuntimeShader {
 	@:glFragmentSource('
 		varying float openfl_Alphav;
 		varying vec4 openfl_ColorMultiplierv;

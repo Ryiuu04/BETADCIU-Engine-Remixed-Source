@@ -125,6 +125,11 @@ class Paths
 		return getPath(file, type, library);
 	}
 
+	inline static public function file2(key:String, location:String, extension:String):String{//:sob: :sob: part 2
+        var data:String = '$location/$key.$extension';
+        return data;
+	}
+
 	inline static public function lua(key:String,?library:String)
 	{
 		if(FileSystem.exists(Paths.modFolders('data/' + key + '.lua')))
@@ -658,6 +663,12 @@ class Paths
 		return null;		
 	}
 
+	public static function addToExclusionsList(key:String) {
+		localTrackedAssets.push(key);
+		dumpExclusions.push(key);
+		trace("added: " + key + " to the exclusions list!");
+	}
+
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if sys
@@ -758,6 +769,10 @@ class Paths
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
 		#end
 	}
+
+	inline static public function getTextureAtlas(key:String){
+        return Paths.image(key);
+    }
 
 	inline static public function getXMLAtlas(key:String, ?library:String) //idk what to call this one
 	{	#if MODS_ALLOWED

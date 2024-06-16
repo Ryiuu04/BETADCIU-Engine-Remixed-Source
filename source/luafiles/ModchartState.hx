@@ -54,6 +54,7 @@ import openfl.display.ShaderParameterType;
 
 import objects.*;
 import states.editors.ModpackMaker;
+import substates.PauseSubState;
 
 import backend.Song;
 import backend.Highscore;
@@ -2818,6 +2819,13 @@ class ModchartState
 			Lua_helper.add_callback(lua, "endSong", function(hmm:String) {
 				PlayState.instance.KillNotes();
 				PlayState.instance.endSong();
+			});
+
+			Lua_helper.add_callback(lua, "restartSong", function(?skipTransition:Bool = false) {
+				PlayState.instance.persistentUpdate = false;
+				FlxG.camera.followLerp = 0;
+				PauseSubState.restartSong(skipTransition,false,false);
+				return true;
 			});
 	
 			//idk if I wanna add events. alright I added the ones that are usable without that much tinkering.

@@ -1,6 +1,6 @@
 package shaders;
 
-import flixel.system.FlxAssets.FlxShader;
+import flixel.addons.display.FlxRuntimeShader;
 import objects.Note;
 
 class RGBPalette {
@@ -116,7 +116,7 @@ class RGBShaderReference
 	}
 }
 
-class RGBPaletteShader extends FlxShader {
+class RGBPaletteShader extends FlxRuntimeShader {
 	@:glFragmentHeader('
 		#pragma header
 		

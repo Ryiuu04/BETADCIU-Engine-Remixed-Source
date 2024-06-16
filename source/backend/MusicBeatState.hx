@@ -41,7 +41,7 @@ class MusicBeatState extends FlxUIState
 
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.framerate);
 
 		if (transIn != null)
 			trace('reg ' + transIn.region);

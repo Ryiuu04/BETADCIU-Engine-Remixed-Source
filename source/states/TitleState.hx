@@ -12,7 +12,7 @@ import flixel.input.gamepad.FlxGamepad;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
-import flixel.system.ui.FlxSoundTray;
+//import flixel.system.ui.FlxSoundTray;
 import lime.app.Application;
 import openfl.Assets;
 import objects.Alphabet;
@@ -77,7 +77,7 @@ class TitleState extends MusicBeatState
 
 		super.create();
 
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		//FlxG.save.bind('funkin', 'ninjamuffin99');
 
 		backend.KadeEngineData.initSave();
 		backend.ClientPrefs.loadPrefs();
@@ -145,7 +145,7 @@ class TitleState extends MusicBeatState
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
 
-		Conductor.changeBPM(110);
+		Conductor.changeBPM(102);
 		persistentUpdate = true;
 
 		// var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -310,7 +310,7 @@ class TitleState extends MusicBeatState
 
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{
-				MusicBeatState.switchState(new SecretState());
+				MusicBeatState.switchState(new MainMenuState());
 				closedState = true;
 			});
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);

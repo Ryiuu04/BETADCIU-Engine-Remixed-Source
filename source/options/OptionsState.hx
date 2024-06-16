@@ -21,7 +21,7 @@ class OptionsState extends MusicBeatState
 	#if debug
 	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
 	#else
-	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
 	#end
 	
 	private var grpOptions:FlxTypedGroup<Alphabet>;
@@ -100,7 +100,7 @@ class OptionsState extends MusicBeatState
 		changeSelection();
 		ClientPrefs.saveSettings();
 
-		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+		/*if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 			{
 				FlxG.sound.music.volume = 1;
 				FlxG.sound.playMusic(Paths.music('songSelect'));
@@ -115,7 +115,7 @@ class OptionsState extends MusicBeatState
 			{
 				FlxG.sound.playMusic(Paths.music('songSelect'));
 				MainMenuState.mainMusic = false;
-			}	
+			}*/
 
 		super.create();
 	}
