@@ -21,7 +21,7 @@ class OptionsState extends MusicBeatState
 	#if debug
 	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
 	#else
-	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
+	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay'];
 	#end
 	
 	private var grpOptions:FlxTypedGroup<Alphabet>;
