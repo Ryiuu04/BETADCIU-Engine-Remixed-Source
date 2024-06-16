@@ -36,6 +36,8 @@ using StringTools;
 
 class PreloadState extends FlxState
 {
+    //Cool Preloader Made by Rozebud for his engine(FPS Plus), Huge props to him
+
     var nextState:FlxState = new TitleState();
 
     var splash:FlxSprite;
