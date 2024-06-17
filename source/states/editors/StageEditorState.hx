@@ -705,32 +705,23 @@ class StageEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		stageList = [];
-		if (Mods.currentModDirectory != 'BETADCIU')
-		{
-				//READDED
-				var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
-				for (i in 0...directories.length) {
-					var directory:String = directories[i];
-					if(FileSystem.exists(directory)) {
-						for (file in FileSystem.readDirectory(directory)) {
-							var path = haxe.io.Path.join([directory, file]);
-							if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-								var stageToCheck:String = file.substr(0, file.length - 5);
-								if(!stagesLoaded.exists(stageToCheck)) {
-									stageList.push(stageToCheck);
-									stagesLoaded.set(stageToCheck, true);
-								}
-							}
+		//READDED
+		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if(!stagesLoaded.exists(stageToCheck)) {
+							stageList.push(stageToCheck);
+							stagesLoaded.set(stageToCheck, true);
 						}
 					}
 				}
+			}
 		}
-
-		//so I"ll use this instead
-		if (FileSystem.exists(Paths.modFolders("data/stageList.txt")))
-			stageList = CoolUtil.coolTextFile2(Paths.modFolders("data/stageList.txt"));
-		else
-			stageList = CoolUtil.coolTextFile(Paths.txt("stageList"));
 		#else
 		stageList = CoolUtil.coolTextFile(Paths.txt("stageList"));
 		#end

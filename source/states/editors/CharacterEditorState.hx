@@ -1398,38 +1398,26 @@ class CharacterEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		characterList = ["bf"];
-
-		if (Mods.currentModDirectory != 'BETADCIU')
-		{
-			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
-				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
-			}
-			
-			 //READDED
-			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-			 for (i in 0...directories.length) {
-				 var directory:String = directories[i];
-				 if(FileSystem.exists(directory)) {
-					 for (file in FileSystem.readDirectory(directory)) {
-						 var path = haxe.io.Path.join([directory, file]);
-						 if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-							 var charToCheck:String = file.substr(0, file.length - 5);
-							 if(!charsLoaded.exists(charToCheck)) {
-								 characterList.push(charToCheck);
-								 charsLoaded.set(charToCheck, true);
-							 }
-						 }
-					 }
-				 }
-			 }
+		if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
+			characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
 		}
-		else
-		{
-			//FOR BETADCIU
-			if (FileSystem.exists(Paths.modFolders('data/characterList.txt')))
-				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
-			else
-				characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+			
+		//READDED
+		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (file.toLowerCase().endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if(!characterList.contains(charToCheck)){
+							characterList.push(charToCheck);
+							charsLoaded.set(charToCheck, true);
+						}
+					}
+				}
+			}
 		}
 		#else
 		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));

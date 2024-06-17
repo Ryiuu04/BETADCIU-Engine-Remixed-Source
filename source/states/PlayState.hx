@@ -374,6 +374,7 @@ class PlayState extends MusicBeatState
 	public var PreloadStage:Stage = null;
 
 	public var bfStrumStyle:String = "";
+	public var dadStrumStyle:String = "";
 	public var camFollowSpeed:Float = 0.04; // so I can modify how fast the camera moves
 	var isMania = false;
 
@@ -3067,6 +3068,7 @@ class PlayState extends MusicBeatState
 			case 0:
 				hudArrDadXPos = [];
 				hudArrDadYPos = [];
+				dadStrumStyle = style;
 		}
 
 		for (i in 0...Main.keyAmmo[mania])
@@ -5045,7 +5047,7 @@ class PlayState extends MusicBeatState
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	public function createRuntimeShader(name:String):FlxRuntimeShader
 	{
-		if(!FlxG.save.data.shaders) return new FlxRuntimeShader();
+		if(!ClientPrefs.data.shaders) return new FlxRuntimeShader();
 
 		#if (!flash && MODS_ALLOWED && sys)
 		if(!runtimeShaders.exists(name) && !initLuaShader(name))
@@ -5063,25 +5065,17 @@ class PlayState extends MusicBeatState
 	}
 
 	public function initLuaShader(name:String, ?glslVersion:Int = 120)
-	{
-		if(!FlxG.save.data.shaders) return false;
-
-		if(runtimeShaders.exists(name))
 		{
-			FlxG.log.warn('Shader $name was already initialized!');
-			return true;
-		}
-
-		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
-		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Mods.currentModDirectory + '/shaders/'));
-
-		for(mod in Paths.getGlobalMods())
-			foldersToCheck.insert(0, Paths.mods(mod + '/shaders/'));
-		
-		for (folder in foldersToCheck)
-		{
-			if(FileSystem.exists(folder))
+			if(!ClientPrefs.data.shaders) return false;
+	
+			#if (MODS_ALLOWED && !flash && sys)
+			if(runtimeShaders.exists(name))
+			{
+				FlxG.log.warn('Shader $name was already initialized!');
+				return true;
+			}
+	
+			for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'shaders/'))
 			{
 				var frag:String = folder + name + '.frag';
 				var vert:String = folder + name + '.vert';
@@ -5107,11 +5101,17 @@ class PlayState extends MusicBeatState
 					return true;
 				}
 			}
+				#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+				addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
+				#else
+				FlxG.log.warn('Missing shader $name .frag AND .vert files!');
+				#end
+			#else
+			FlxG.log.warn('This platform doesn\'t support Runtime Shaders!');
+			#end
+			return false;
 		}
-		FlxG.log.warn('Missing shader $name .frag AND .vert files!');
-		return false;
-	}
-	#end
+		#end
 
 	function set_songSpeed(value:Float):Float
 	{

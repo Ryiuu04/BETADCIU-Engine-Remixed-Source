@@ -966,6 +966,8 @@ class ModchartState
 		set('seenCutscene', PlayState.seenCutscene);
 		set('scriptName', scriptName);
 
+		set('shadersEnabled', ClientPrefs.data.shaders);
+
 		if (PlayState.SONG != null)
 		{
 			set("bpm", PlayState.SONG.bpm);

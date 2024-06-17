@@ -784,7 +784,7 @@ class ChartingState extends MusicBeatState
 			loadArrayTexts();
 		
 			var dropDowns:Array<FlxUIDropDownMenu> = [player1DropDown, player2DropDown, gfVersionDropDown, stageDropDown, noteStyleDropDown];
-			var dropDownsData:Array<Array<String>> = [loadCharacterList(), loadCharacterList(), loadCharacterList(), CoolUtil.coolTextFile(Paths.txt('stageList')), CoolUtil.coolTextFile(Paths.txt('noteStyleList'))];
+			var dropDownsData:Array<Array<String>> = [loadCharacterList(), loadCharacterList(), loadCharacterList(), loadStageList(), loadNoteStyleList()];
 			var dropDownsLabel:Array<String> = [_song.player1, _song.player2, _song.gfVersion, _song.stage, _song.noteStyle];
 
 			for (i in 0...dropDowns.length){
@@ -862,8 +862,8 @@ class ChartingState extends MusicBeatState
 	function loadArrayTexts()
 	{
 		characters = loadCharacterList();
-		stages = CoolUtil.coolTextFile(Paths.txt('stageList'));
-		noteStyles = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
+		stages = loadStageList();
+		noteStyles = loadNoteStyleList();
 	}
 
 	var stepperLength:FlxUINumericStepper;
@@ -3046,45 +3046,104 @@ class ChartingState extends MusicBeatState
 		var characterList:Array<String> = [];
 
 		#if MODS_ALLOWED
-		characterList = ["bf"];
+		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
 
-		if (Mods.currentModDirectory != 'BETADCIU')
-		{
-			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
-				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
-			}
-				
-			 //READDED
-			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-			 for (i in 0...directories.length) {
-				 var directory:String = directories[i];
-				 if(FileSystem.exists(directory)) {
-					 for (file in FileSystem.readDirectory(directory)) {
-						 var path = haxe.io.Path.join([directory, file]);
-						 if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-							 var charToCheck:String = file.substr(0, file.length - 5);
-							 if(!charsLoaded.exists(charToCheck)) {
-								 characterList.push(charToCheck);
-								 charsLoaded.set(charToCheck, true);
-							 }
-						 }
-					 }
-				 }
-			 }
+		if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
+			characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
 		}
-		else
-		{
-			//FOR BETADCIU
-			if (FileSystem.exists(Paths.modFolders('data/characterList.txt')))
-				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
-			else
-				characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+				
+		//READDED
+		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if(!charsLoaded.exists(charToCheck)) {
+							characterList.push(charToCheck);
+							charsLoaded.set(charToCheck, true);
+						}
+					}
+				}
+			}
 		}
 		#else
 		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		#end
 
 		return characterList;
+	}
+
+	function loadStageList() {
+		var stagesLoaded:Map<String, Bool> = new Map();
+		var stageList:Array<String> = [];
+
+		#if MODS_ALLOWED
+		stageList = CoolUtil.coolTextFile(Paths.txt('stageList'));
+
+		if (FileSystem.exists(Paths.modFolders('data/stageList.txt'))){
+			stageList = CoolUtil.coolTextFile2(Paths.modFolders('data/stageList.txt'));
+		}
+				
+		//READDED
+		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if(!stagesLoaded.exists(stageToCheck)) {
+							stageList.push(stageToCheck);
+							stagesLoaded.set(stageToCheck, true);
+						}
+					}
+				}
+			}
+		}
+		#else
+		stageList = CoolUtil.coolTextFile(Paths.txt('stageList'));
+		#end
+
+		return stageList;
+	}
+
+	function loadNoteStyleList() {
+		var noteStyleLoaded:Map<String, Bool> = new Map();
+		var noteStyleList:Array<String> = [];
+
+		#if MODS_ALLOWED
+		noteStyleList = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
+
+		if (FileSystem.exists(Paths.modFolders('data/noteStyleList.txt'))){
+			noteStyleList = CoolUtil.coolTextFile2(Paths.modFolders('data/noteStyleList.txt'));
+		}
+				
+		//READDED
+		var directories:Array<String> = [Paths.mods('images/notes/'), Paths.mods(Mods.currentModDirectory + '/images/notes/'), Paths.getPreloadPath('images/notes/'), Paths.getSharedPath('images/notes/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.xml') && !file.startsWith('noteSplashes-') && !file.startsWith('HURTnoteSplashes') && !file.startsWith('HURTNOTE_assets') && !file.startsWith('noteSplashes')) {
+						var charToCheck:String = file.substr(0, file.length - 4);
+						if(!noteStyleLoaded.exists(charToCheck)) {
+							noteStyleList.push(charToCheck);
+							noteStyleLoaded.set(charToCheck, true);
+						}
+					}
+				}
+			}
+		}
+		#else
+		noteStyleList = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
+		#end
+
+		return noteStyleList;
 	}
 
 	function pauseMusic()

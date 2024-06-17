@@ -146,7 +146,7 @@ class MainMenuState extends MusicBeatState
 
 		var versionShit:FlxText = new FlxText(FlxG.width * 0.750, FlxG.height - 48, 0,"Remixed: "+ remixedVer + "\n" + kadeEngineVer + " Version: " + betadciuVer + "\nFriday Night Funkin' Version: " + gameVer, 12);
 		versionShit.scrollFactor.set();
-		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
 
 		// NG.core.calls.event.logEvent('swag').send();
@@ -307,7 +307,7 @@ class MainMenuState extends MusicBeatState
 			{
 				spr.animation.play('selected');
 
-				if (spr.ID < 6)
+				if (spr.ID < 7)
 					camFollow.setPosition(700, spr.getGraphicMidpoint().y);
 					//trace(spr.getGraphicMidpoint().y);
 			}
