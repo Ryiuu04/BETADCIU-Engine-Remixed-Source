@@ -2956,10 +2956,7 @@ class ChartingState extends MusicBeatState
 		else
 			PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
 
-		if (Main.hiddenSongs.contains(song.toLowerCase()) && !Main.isHidden || song.toLowerCase() == 'restore' && !Main.restoreUnlocked || song.toLowerCase() == 'deathmatch-holo' && !Main.deathHolo)
-			LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-		else
-			LoadingState.loadAndSwitchState(new ChartingState());	
+		LoadingState.loadAndSwitchState(new ChartingState());	
 	}
 
 	function loadAutosave():Void

@@ -256,6 +256,7 @@ class TitleState extends MusicBeatState
 	}
 
 	var transitioning:Bool = false;
+	var pressedEnter:Bool = false;
 
 	override function update(elapsed:Float)
 	{
@@ -268,7 +269,7 @@ class TitleState extends MusicBeatState
 			FlxG.fullscreen = !FlxG.fullscreen;
 		}
 
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
+		pressedEnter = FlxG.keys.justPressed.ENTER;
 
 		#if mobile
 		for (touch in FlxG.touches.list)
@@ -379,63 +380,39 @@ class TitleState extends MusicBeatState
 			switch (curBeat)
 			{
 				case 1:
-					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
-				// credTextShit.visible = true;
+					createCoolText(['The', 'Funkin Crew Inc']);
 				case 3:
-					addMoreText('present');
-				// credTextShit.text += '\npresent...';
-				// credTextShit.addText();
+					addMoreText('presents');
 				case 4:
 					deleteCoolText();
-				// credTextShit.visible = false;
-				// credTextShit.text = 'In association \nwith';
-				// credTextShit.screenCenter();
 				case 5:
 					if (Main.watermarks)
 						createCoolText(['BETADCIU Engine', 'by']);
 					else
-						createCoolText(['In Partnership', 'with']);
+						createCoolText(['In association', 'with']);
 				case 7:
 					if (Main.watermarks)
 						addMoreText('Blantados');
 					else
 					{
-						addMoreText('Newgrounds');
+						addMoreText('newgrounds');
 						ngSpr.visible = true;
 					}
-				// credTextShit.text += '\nNewgrounds';
 				case 8:
 					deleteCoolText();
 					ngSpr.visible = false;
-				// credTextShit.visible = false;
-	
-				// credTextShit.text = 'Shoutouts Tom Fulp';
-				// credTextShit.screenCenter();
 				case 9:
-					Main.seenMessage = true;
 					createCoolText([curWacky[0]]);
-				// credTextShit.visible = true;
 				case 11:
 					addMoreText(curWacky[1]);
-					if (curWacky[1].contains('uncorruption'))
-					{
-						Main.restoreUnlocked = true;
-					}
-				// credTextShit.text += '\nlmao';
 				case 12:
 					deleteCoolText();
-				// credTextShit.visible = false;
-				// credTextShit.text = "Friday";
-				// credTextShit.screenCenter();
 				case 13:
 					addMoreText('Friday Night Funkin');
-				// credTextShit.visible = true;
 				case 14:
 					addMoreText('BETADCIU');
-				// credTextShit.text += '\nNight';
 				case 15:
-					addMoreText('Engine'); // credTextShit.text += '\nFunkin';
-	
+					addMoreText('Engine');
 				case 16:
 					skipIntro();
 			}
@@ -466,6 +443,7 @@ class TitleState extends MusicBeatState
 				}, 0);
 
 			skippedIntro = true;
+			pressedEnter = true;//stupid fix for the "flashbang" after not skipping the intro
 		}
 	}
 }

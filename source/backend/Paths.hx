@@ -227,16 +227,10 @@ class Paths
 	inline static public function inst2(song:String, ?library:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-		}
 
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstAlt'))))
-			suf = 'Alt';	
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -258,16 +252,10 @@ class Paths
 	inline static public function voices2(song:String, ?library:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-		}
 
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesAlt'))))
-			suf = 'Alt';		
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -289,11 +277,6 @@ class Paths
 	inline static public function voices(song:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
-			switch (songLowercase) {
-				case 'dad-battle': songLowercase = 'dadbattle';
-				case 'philly-nice': songLowercase = 'philly';	
-				case 'scary-swings': songLowercase = 'scary swings';
-			}
 
 		var pre:String = "";
 		var suf:String = "";
@@ -304,10 +287,8 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")		
 			suf = 'Guest';
-		if (PlayState.isBETADCIU && (songLowercase == 'kaboom' || songLowercase == 'triple-trouble'))		
+		if (PlayState.isBETADCIU && (song == 'kaboom' || song == 'triple-trouble'))		
 			suf = 'BETADCIU';
-		if (Main.isMegalo && songLowercase == 'hill-of-the-void')		
-			suf = 'Megalo';
 
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
 	}
@@ -315,16 +296,10 @@ class Paths
 	inline static public function inst(song:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
-			switch (songLowercase) {
-				case 'dad-battle': songLowercase = 'dadbattle';
-				case 'philly-nice': songLowercase = 'philly';
-			}
 
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && song.toLowerCase() == "sharkventure")
-			pre = 'Alt_';		
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		

@@ -11,6 +11,7 @@
 		"gf"
 	],
 	"weekBackground": "stage",
+	"difficulties": "Easy, Normal, Hard, Erect, Nightmare",
 
 	"storyName": "Daddy Dearest",
 	"weekBefore": "tutorial",

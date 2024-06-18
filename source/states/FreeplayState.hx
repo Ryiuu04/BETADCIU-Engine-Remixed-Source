@@ -205,6 +205,8 @@ class FreeplayState extends MusicBeatState
 			trace(md);
 		 */
 
+		changeBGColor();
+
 		super.create();
 	}
 
@@ -212,6 +214,21 @@ class FreeplayState extends MusicBeatState
 	{
 		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
 	}
+
+	public function changeBGColor():Void{
+		var newColor:Int = songs[curSelected].color;
+		if(newColor != intendedColor) {
+			if(colorTween != null) {
+				colorTween.cancel();
+			}
+			intendedColor = newColor;
+			colorTween = FlxTween.color(bg, 0.5, bg.color, intendedColor, {
+				onComplete: function(twn:FlxTween) {
+					colorTween = null;
+				}
+			});
+		}
+	}	
 
 	/*public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
 	{
@@ -276,15 +293,10 @@ class FreeplayState extends MusicBeatState
 		if (accepted && canMove)
 		{
 			canMove = false;
-
-			// adjusting the song name to be compatible
-			var songFormat = StringTools.replace(songs[curSelected].songName, " ", "-");
-			switch (songFormat) {
-				case 'Dad-Battle': songFormat = 'Dadbattle';
-				case 'Philly-Nice': songFormat = 'Philly';
-			}
 		
 			trace(songs[curSelected].songName);
+
+			var songFormat = StringTools.replace(songs[curSelected].songName, " ", "-");
 
 			var poop:String = Highscore.formatSong(songFormat, curDifficulty);
 
@@ -311,10 +323,7 @@ class FreeplayState extends MusicBeatState
 						if (FlxG.keys.pressed.ALT){
 							FlxG.switchState(new ChartingState());
 						}else{
-							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
-								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-							else
-								LoadingState.loadAndSwitchState(new CustomLoading());
+							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -336,18 +345,10 @@ class FreeplayState extends MusicBeatState
 			curDifficulty = 0;
 
 		lastDifficultyName = CoolUtil.difficulties[curDifficulty];
-
-		// adjusting the highscore song name to be compatible (changeDiff)
-		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
-		switch (songHighscore) {
-			case 'Dad-Battle': songHighscore = 'Dadbattle';
-			case 'Philly-Nice': songHighscore = 'Philly';
-		}
-		
 			
 		#if !switch
-		intendedScore = Highscore.getScore(songHighscore, curDifficulty);
-		combo = Highscore.getCombo(songHighscore, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
 		#end
 
 		PlayState.storyDifficulty = curDifficulty;
@@ -364,20 +365,9 @@ class FreeplayState extends MusicBeatState
 			curSelected = songs.length - 1;
 		if (curSelected >= songs.length)
 			curSelected = 0;
-			
-		var newColor:Int = songs[curSelected].color;
-		if(newColor != intendedColor) {
-			if(colorTween != null) {
-				colorTween.cancel();
-			}
-			intendedColor = newColor;
-			colorTween = FlxTween.color(bg, 0.5, bg.color, intendedColor, {
-				onComplete: function(twn:FlxTween) {
-					colorTween = null;
-				}
-			});
-		}
 
+		changeBGColor();
+			
 		// selector.y = (70 * curSelected) + 30;
 
 		#if !switch

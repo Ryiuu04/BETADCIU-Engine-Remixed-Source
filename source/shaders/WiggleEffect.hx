@@ -1,7 +1,7 @@
 package shaders;
 
 // STOLEN FROM HAXEFLIXEL DEMO LOL
-import flixel.addons.display.FlxRuntimeShader;
+import flixel.system.FlxAssets.FlxShader;
 
 enum WiggleEffectType
 {
@@ -59,7 +59,7 @@ class WiggleEffect
 	}
 }
 
-class WiggleShader extends FlxRuntimeShader
+class WiggleShader extends FlxShader
 {
 	@:glFragmentSource('
 		#pragma header

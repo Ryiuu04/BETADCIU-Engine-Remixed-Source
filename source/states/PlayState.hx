@@ -209,6 +209,7 @@ class PlayState extends MusicBeatState
 	public var boyfriend:Boyfriend;
 
 	public static var preloadChar:Character;
+	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
 	var blackScreen:FlxSprite;
@@ -486,10 +487,6 @@ class PlayState extends MusicBeatState
 
 		// pre lowercasing the song name (create)
 		songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-		}
 		
 		#if desktop
 		executeModchart = FileSystem.exists(Paths.lua(songLowercase  + "/modchart" + suf));
@@ -979,12 +976,6 @@ class PlayState extends MusicBeatState
 			scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 		}
 		
-		switch (songLowercase)
-		{
-			case 'storm': scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.BLACK, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.WHITE);
-			case 'hunger' | 'aspirer': scoreTxt.setFormat(Paths.font("starv.ttf"), 16, FlxColor.WHITE, CENTER);	
-		}
-		
 		scoreTxt.scrollFactor.set();													  
 		add(scoreTxt);
 
@@ -1249,41 +1240,6 @@ class PlayState extends MusicBeatState
 
 	public function death():Void
 	{
-		if (SONG.song.toLowerCase() == 'monochrome')
-		{
-			boyfriend.stunned = true;
-			paused = true;
-
-			vocals.stop();
-			FlxG.sound.music.stop();
-
-			FlxTween.tween(dad, {alpha: 0}, 1, {ease: FlxEase.linear, onComplete: function (twn:FlxTween){
-				remove(dad);
-			}});
-
-			FlxTween.tween(Stage.swagBacks['stageFront'], {alpha: 0}, 1, {ease: FlxEase.linear, onComplete: function (twn:FlxTween){
-				remove(Stage.swagBacks['stageFront']);
-			}});
-
-			FlxTween.tween(healthBar, {alpha: 0}, 1, {ease: FlxEase.linear, onComplete: function (twn:FlxTween) {
-				healthBar.visible = false;
-				healthBarBG.visible = false;
-				scoreTxt.visible = false;
-				iconP1.visible = false;
-				iconP2.visible = false;
-			}});
-			FlxTween.tween(healthBarBG, {alpha: 0}, 1, {ease: FlxEase.linear});
-			FlxTween.tween(scoreTxt, {alpha: 0}, 1, {ease: FlxEase.linear});
-			FlxTween.tween(iconP1, {alpha: 0}, 1, {ease: FlxEase.linear});
-			FlxTween.tween(iconP2, {alpha: 0}, 1, {ease: FlxEase.linear});
-			for (i in playerStrums) {
-				FlxTween.tween(i, {alpha: 0}, 1, {ease: FlxEase.linear});
-			}
-			new FlxTimer().start(1.2, function(tmr:FlxTimer)
-			{
-				MusicBeatState.resetState();
-			});
-		}
 		if(!stopDeath)
 		{
 			var ret:Dynamic = callOnScripts('onGameOver', null, true);
@@ -1295,18 +1251,12 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				persistentDraw = false;
 				paused = true;
-				
+					
 				vocals.stop();
 				FlxG.sound.music.stop();
 
 				var daX = boyfriend.getScreenPosition().x;
 				var daY = boyfriend.getScreenPosition().y;
-
-				/*if (SONG.song.toLowerCase() == 'epiphany')
-				{
-					daX = dad1.getScreenPosition().x;
-					daY = dad1.getScreenPosition().y;
-				}*/
 
 				isDead = true;
 
@@ -2476,13 +2426,6 @@ class PlayState extends MusicBeatState
 		{
 			inCutscene = false;
 				
-			if (songLowercase == 'ballistic' && showCutscene)
-			{
-				for (i in [strumLineNotes, scoreTxt, healthBarBG, healthBar, iconP1, iconP2]){
-					i.visible = true;
-				}
-			}
-
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;			
 
 			generateStaticArrows(0, dad.noteSkin, !skipArrowStartTween, daStartAlpha);
@@ -3812,15 +3755,11 @@ class PlayState extends MusicBeatState
 		if (!transitioning)
 		{
 			if (SONG.validScore)
-			{
+			{	
 				// adjusting the highscore song name to be compatible
 				// would read original scores if we didn't change packages
 				var songHighscore = StringTools.replace(PlayState.SONG.song, " ", "-");
-				switch (songHighscore) {
-					case 'Dad-Battle': songHighscore = 'Dadbattle';
-					case 'Philly-Nice': songHighscore = 'Philly';
-				}
-	
+
 				#if !switch
 				Highscore.saveScore(songHighscore, Math.round(songScore), storyDifficulty);
 				Highscore.saveCombo(songHighscore, Ratings.GenerateLetterRank(accuracy), storyDifficulty);
@@ -3859,19 +3798,16 @@ class PlayState extends MusicBeatState
 
 					FlxG.save.data.weekCompleted = states.StoryMenuState.weekCompleted;
 					FlxG.save.flush();
+
+					changedDifficulty = false;
 				}
 				else
 				{
-					
 					// adjusting the song name to be compatible
 					var songFormat = StringTools.replace(PlayState.storyPlaylist[0], " ", "-");
-					switch (songFormat) {
-						case 'Dad-Battle': songFormat = 'Dadbattle';
-						case 'Philly-Nice': songFormat = 'Philly';
-					}
-	
-					var poop:String = Highscore.formatSong(songFormat, storyDifficulty);
-	
+
+					var poop:String = Highscore.formatSong(songFormat, storyDifficulty);	
+
 					trace('LOADING NEXT SONG');
 					trace(poop);
 	
@@ -3920,6 +3856,7 @@ class PlayState extends MusicBeatState
 					else
 						MusicBeatState.switchState(new states.FreeplayState());
 				}
+				changedDifficulty = false;
 			}
 
 			transitioning = true;

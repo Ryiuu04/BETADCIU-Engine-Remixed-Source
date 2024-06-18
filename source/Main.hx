@@ -38,17 +38,8 @@ class Main extends Sprite
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
 	public static var watermarks = true; // Whether to put Kade Engine liteartly anywhere
-	public static var noCopyright:Bool = false; // For Sharkventure Copyright Stuff
-	public static var isHidden:Bool = false; //Lol Hidden Menu Stuff
-	public static var seenMessage:Bool = false; //Lol Hidden Restore Shit
-	public static var restoreUnlocked:Bool = false; //Lol Hidden Restore Shit
-	public static var realDeath:Bool = false; //now unused
-	public static var cursedUnlocked:Bool = false; //Lol cursed cocoa Shit
-	public static var deathHolo:Bool = false; //Lol Hidden deathmatch Shit
-	public static var hiddenSongs:Array<String> = ['hunger', 'diva', 'sorrow', 'shinkyoku', 'norway', 'haachama-ex']; //Lol Hidden  stuff
 	public static var keyAmmo:Array<Int> = [4, 6, 9, 5, 7];
 	public static var dataJump:Array<Int> = [8, 12, 18];
-	public static var isMegalo:Bool = false;
 	public static var curFPS:Int = 120;
 
 	public static var appName:String = ''; // Application name.

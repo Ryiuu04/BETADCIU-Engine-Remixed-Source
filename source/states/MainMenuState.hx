@@ -157,8 +157,6 @@ class MainMenuState extends MusicBeatState
 			controls.setKeyboardScheme(KeyboardScheme.Duo(true), true);
 
 		changeItem();
-
-		Main.isHidden = false;
 		
 		super.create();
 	}

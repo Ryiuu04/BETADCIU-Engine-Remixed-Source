@@ -77,7 +77,7 @@ import states.TitleState;
 	public var useGL:Bool = false;
 	public var poltatoPC:Bool = false;
 	public var controllerMode:Bool = false;
-	public var psychUI:Bool = false;
+	public var psychUI:Bool = true;//i was planning on removing this, but removing this will break A LOT of Blantados scripts, so i'll make it enabled by default
 	public var noteSplashes:Bool = true;
 	public var fpsRain:Bool = false;
 	public var cursing:Bool = true;

@@ -287,10 +287,7 @@ class NeonightState extends MusicBeatState
 					if (FlxG.keys.pressed.ALT){
 						MusicBeatState.switchState(new ChartingState());
 					}else{
-						if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
-							LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-						else
-							LoadingState.loadAndSwitchState(new CustomLoading());
+						LoadingState.loadAndSwitchState(new CustomLoading());
 					}
 				});
 			}

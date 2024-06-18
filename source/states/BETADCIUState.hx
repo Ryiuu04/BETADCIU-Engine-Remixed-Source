@@ -105,12 +105,10 @@ class BETADCIUState extends MusicBeatState
 			FlxG.sound.playMusic(Paths.music('songSelect'));
 		}
 
-		Main.isMegalo = false;
-
-		 #if desktop
-		 // Updating Discord Rich Presence
-		 DiscordClient.changePresence("In BETADCIU Menu", null);
-		 #end
+		#if desktop
+		// Updating Discord Rich Presence
+		DiscordClient.changePresence("In BETADCIU Menu", null);
+		#end
 
 		var isDebug:Bool = false;
 
@@ -476,13 +474,6 @@ class BETADCIUState extends MusicBeatState
 		if (accepted && inMain && canMove)
 		{
 			persistentUpdate = false;
-			if (FlxG.random.bool(20) && songs[curSelected].songName.toLowerCase() == 'hill-of-the-void')
-			{
-				curDifficulty = 1;
-				Main.isMegalo = true;
-				trace ('sans');
-			}
-
 			PlayState.isBETADCIU = true; //gotta move this cuz of the format thing
 
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
@@ -508,10 +499,7 @@ class BETADCIUState extends MusicBeatState
 					if (FlxG.keys.pressed.ALT){
 						MusicBeatState.switchState(new ChartingState());
 					}else{
-						if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
-							LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-						else
-							LoadingState.loadAndSwitchState(new CustomLoading());
+						LoadingState.loadAndSwitchState(new CustomLoading());
 					}
 				});
 			}
@@ -523,10 +511,7 @@ class BETADCIUState extends MusicBeatState
 						if (FlxG.keys.pressed.ALT){
 							MusicBeatState.switchState(new ChartingState());
 						}else{
-							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
-								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-							else
-								LoadingState.loadAndSwitchState(new CustomLoading());
+							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -536,13 +521,6 @@ class BETADCIUState extends MusicBeatState
 				}	
 			});
 		}
-
-		#if debug
-			if (FlxG.keys.justPressed.FIVE)
-			{
-				Main.isHidden = !Main.isHidden;
-			}
-		#end
 
 		if (FlxG.keys.justPressed.ESCAPE && !inMain && !warning)
 		{
@@ -583,14 +561,8 @@ class BETADCIUState extends MusicBeatState
 	{
 		FlxG.sound.music.stop();
 		FlxG.sound.play(PlayState.existsInCTS('ANGRY_TEXT_BOX', 'shared'));
-		Main.isHidden = true;
 
-		var songFormat = StringTools.replace(songName, " ", "-");
-		switch (songFormat) {
-			case 'Dad-Battle': songFormat = 'Dadbattle';
-			case 'Philly-Nice': songFormat = 'Philly';
-			case 'Scary-Swings': songFormat = 'Scary Swings';
-		}
+		var songFormat = StringTools.replace(songs[curSelected].songName, " ", "-");
 
 		var poop:String = Highscore.formatSong(songFormat, curDifficulty);
 
@@ -616,17 +588,10 @@ class BETADCIUState extends MusicBeatState
 			curDifficulty = 0;
 
 		lastDifficultyName = CoolUtil.difficulties[curDifficulty];
-
-		// adjusting the highscore song name to be compatible (changeDiff)
-		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
-		switch (songHighscore) {
-			case 'Dad-Battle': songHighscore = 'Dadbattle';
-			case 'Philly-Nice': songHighscore = 'Philly';
-		}
 		
 		#if !switch
-		intendedScore = Highscore.getScore(songHighscore, curDifficulty);
-		combo = Highscore.getCombo(songHighscore, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
 		#end
 
 		PlayState.storyDifficulty = curDifficulty;

@@ -1,8 +1,8 @@
 package shaders;
 
-import flixel.addons.display.FlxRuntimeShader;
+import flixel.system.FlxAssets.FlxShader;
 
-class OverlayShader extends FlxRuntimeShader
+class OverlayShader extends FlxShader
 {
 	@:glFragmentSource('
 		#pragma header

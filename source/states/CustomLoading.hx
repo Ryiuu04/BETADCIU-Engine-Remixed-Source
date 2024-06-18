@@ -64,21 +64,13 @@ class CustomLoading extends MusicBeatState
 		titlestatebg.screenCenter(X);
 		add(titlestatebg);
 
-        var songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
-		}
-
         PlayState.customLoaded = true;
 
         if (PlayState.isBETADCIU || PlayState.isNeonight || PlayState.isVitor)
             isABETADCIU = true;
 
         // the suffixes. will add more later
-        if (PlayState.isBETADCIU && FileSystem.exists(Paths.lua(songLowercase  + "/modchart-betadciu")))
+        if (PlayState.isBETADCIU && FileSystem.exists(Paths.lua(PlayState.SONG.song  + "/modchart-betadciu")))
 			suf = '-betadciu';
 
         if (PlayState.isNeonight)
@@ -119,15 +111,15 @@ class CustomLoading extends MusicBeatState
     
         toBeDone = 0;
 
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
+        if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload" + suf)))
         {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload" + suf));
+            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload" + suf));
             toBeDone += characters.length;
         }
 
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage" + suf)))
+        if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload-stage" + suf)))
         {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage" + suf));
+            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload-stage" + suf));
             toBeDone += characters.length;
         }
             
@@ -169,17 +161,9 @@ class CustomLoading extends MusicBeatState
 
     function cache()
     {
-        var songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
-		}
-
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
+        if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload" + suf)))
         {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload" + suf));
+            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload" + suf));
             for (i in 0...characters.length)
             {
                 var data:Array<String> = characters[i].split(' ');
@@ -195,9 +179,9 @@ class CustomLoading extends MusicBeatState
             }
         }   
         
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage"+suf)) && FlxG.save.data.stageChange)
+        if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload-stage"+suf)) && FlxG.save.data.stageChange)
         {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage"+suf));
+            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload-stage"+suf));
 
             for (i in 0...characters.length)
             {

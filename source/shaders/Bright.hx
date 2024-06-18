@@ -1,8 +1,8 @@
 package;
 
-import flixel.addons.display.FlxRuntimeShader;
+import flixel.system.FlxAssets.FlxShader;
 
-class Bright extends FlxRuntimeShader
+class Bright extends FlxShader
 {
 	@:glFragmentSource('
 		#pragma header

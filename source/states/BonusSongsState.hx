@@ -26,10 +26,8 @@ class BonusSongsState extends MusicBeatState
 	var curDifficulty:Int = 2;
 
 	var scoreText:FlxText;
-	var infoText:FlxText;
 	var diffText:FlxText;
 	var comboText:FlxText;
-	var copyrightText:FlxText;
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
 	var combo:String = '';
@@ -44,12 +42,17 @@ class BonusSongsState extends MusicBeatState
 	var enterText:Alphabet;
 	var otherText:FlxText;
 
+	var bg:FlxSprite;
+
 	var inUnlockMenu:Bool;
 	public static var canMove:Bool;
 	public var warning:Bool = false;
 	private static var lastDifficultyName:String = '';
 
 	private var iconArray:Array<HealthIcon> = [];
+
+	var intendedColor:Int;
+	var colorTween:FlxTween;
 
 	override function create()
 	{
@@ -121,33 +124,15 @@ class BonusSongsState extends MusicBeatState
 		#if debug
 		isDebug = true;
 		#end
-
-		var lamentCombo:String = '';
-		var rootsCombo:String = '';
-		var spookyCombo:String = '';
-		var ughCombo:String = '';
-		var argumentCombo:String = '';
-		var unholyCombo:String = '';
-
-		#if !switch
-		lamentCombo = Highscore.getCombo('Lament', 2);
-		rootsCombo = Highscore.getCombo('Roots', 2);
-		spookyCombo = Highscore.getCombo('Spooky-Fight', 2);
-		ughCombo = Highscore.getCombo('Ugh', 2);
-		argumentCombo = Highscore.getCombo('Argument', 2);
-		unholyCombo = Highscore.getCombo('Unholy-Worship', 2);
-		#end
-
-		if (TitleState.curWacky[1].contains('uncorruption') && Main.seenMessage)
-			addSong('Restore', 6, 'senpai-glitch');
 	
 		// LOAD MUSIC
 
 		// LOAD CHARACTERS
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = FlxColor.fromRGB(112,167,240);
 		add(bg);
+		intendedColor = bg.color;
 		
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
@@ -179,7 +164,7 @@ class BonusSongsState extends MusicBeatState
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		// scoreText.autoSize = false;
-		scoreText.setFormat(Paths.font("Renogare-Regular.otf"), 32, FlxColor.WHITE, RIGHT);
+		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
 		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
@@ -195,26 +180,6 @@ class BonusSongsState extends MusicBeatState
 		add(comboText);
 
 		add(scoreText);
-
-		infoText = new FlxText(FlxG.width * 0.7, 105, FlxG.height, "", 20);
-		infoText.setFormat(Paths.font("Renogare-Regular.otf"), 20, FlxColor.WHITE, LEFT);
-		infoText.text = 'This song contains copyrighted' 
-		+ '\ncontent. Press P for Alternate'
-		+ '\nInst.';
-
-		copyrightText = new FlxText(FlxG.width * 0.7, 155, FlxG.height, "", 32);
-		copyrightText.setFormat(Paths.font("Renogare-Regular.otf"), 32, FlxColor.WHITE, LEFT);
-		if (!Main.noCopyright) 
-			copyrightText.text = '\nAlternate Inst: Off';
-		else 
-			copyrightText.text = '\nAlternate Inst: On';
-		
-		infoBG = new FlxSprite(scoreText.x - 6, 100).makeGraphic(Std.int(FlxG.width * 0.35), 132, 0xFF000000);
-		infoBG.alpha = 0.6;
-		add(infoBG);
-
-		add(infoText);
-		add(copyrightText);
 
 		blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 0.9), Std.int(FlxG.height * 0.5), FlxColor.BLACK);
 		blackScreen.screenCenter();
@@ -273,25 +238,7 @@ class BonusSongsState extends MusicBeatState
 
 		var swag:Alphabet = new Alphabet(1, 0, "swag");
 
-		/*if (FlxG.save.data.deathUnlocked && !FlxG.save.data.seenDeathPassword)
-		{
-			FlxG.sound.play(PlayState.existsInCTS('unlock'));
-			blackScreen.visible = true;
-			enterText.visible = true;
-			otherText.visible = true;
-			inUnlockMenu = true;
-			FlxG.save.data.seenDeathPassword = true;
-		}
-
-		if (FlxG.save.data.deathHoloUnlocked && !FlxG.save.data.seenDeathHoloPassword)
-		{
-			FlxG.sound.play(PlayState.existsInCTS('unlock'));
-			blackScreen.visible = true;
-			enterText.visible = true;
-			otherText.visible = true;
-			inUnlockMenu = true;
-			FlxG.save.data.seenDeathHoloPassword = true;
-		}*/
+		changeBGColor();
 			
 		if (warning)
 		{
@@ -326,6 +273,21 @@ class BonusSongsState extends MusicBeatState
 	{
 		songs.push(new FreeplayState.SongMetadata(songName, weekNum, songCharacter));
 	}
+
+	public function changeBGColor():Void{
+		var newColor:Int = songs[curSelected].color;
+		if(newColor != intendedColor) {
+			if(colorTween != null) {
+				colorTween.cancel();
+			}
+			intendedColor = newColor;
+			colorTween = FlxTween.color(bg, 0.5, bg.color, intendedColor, {
+				onComplete: function(twn:FlxTween) {
+					colorTween = null;
+				}
+			});
+		}
+	}	
 
 	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
 	{
@@ -437,10 +399,7 @@ class BonusSongsState extends MusicBeatState
 					if (FlxG.keys.pressed.ALT){
 						MusicBeatState.switchState(new ChartingState());
 					}else{
-						if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
-							LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-						else
-							LoadingState.loadAndSwitchState(new CustomLoading());
+						LoadingState.loadAndSwitchState(new CustomLoading());
 					}
 				});
 			}
@@ -452,10 +411,7 @@ class BonusSongsState extends MusicBeatState
 						if (FlxG.keys.pressed.ALT){
 							MusicBeatState.switchState(new ChartingState());
 						}else{
-							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked)
-								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
-							else
-								LoadingState.loadAndSwitchState(new CustomLoading());
+							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -464,21 +420,6 @@ class BonusSongsState extends MusicBeatState
 					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
 				}
 			});
-		}
-
-		if (infoText.visible == true && FlxG.keys.justPressed.P)
-		{
-			Main.noCopyright = !Main.noCopyright;
-			if (!Main.noCopyright) 
-			{
-				FlxG.sound.play(PlayState.existsInCTS('cancelMenu'));
-				copyrightText.text = '\nAlternate Inst: Off';
-			}
-			else 
-			{
-				FlxG.sound.play(PlayState.existsInCTS('confirmMenu'));
-				copyrightText.text = '\nAlternate Inst: On';
-			}
 		}
 	}
 
@@ -493,17 +434,10 @@ class BonusSongsState extends MusicBeatState
 
 		lastDifficultyName = CoolUtil.difficulties[curDifficulty];
 
-		// adjusting the highscore song name to be compatible (changeDiff)
-		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
-		switch (songHighscore) {
-			case 'Dad-Battle': songHighscore = 'Dadbattle';
-			case 'Philly-Nice': songHighscore = 'Philly';
-		}
-		
 			
 		#if !switch
-		intendedScore = Highscore.getScore(songHighscore, curDifficulty);
-		combo = Highscore.getCombo(songHighscore, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
 		#end
 
 		PlayState.storyDifficulty = curDifficulty;
@@ -520,6 +454,8 @@ class BonusSongsState extends MusicBeatState
 			curSelected = songs.length - 1;
 		if (curSelected >= songs.length)
 			curSelected = 0;
+
+		changeBGColor();
 
 		// selector.y = (70 * curSelected) + 30;
 
@@ -598,19 +534,6 @@ class BonusSongsState extends MusicBeatState
 		if(newPos > -1)
 		{
 			curDifficulty = newPos;
-		}
-
-		if (songs[curSelected].songName.toLowerCase() == 'sharkventure')
-		{
-			infoBG.visible = true;
-			infoText.visible = true;
-			copyrightText.visible = true;	
-		}
-		else if (songs[curSelected].songName.toLowerCase() != 'sharkventure')
-		{
-			infoBG.visible = false;
-			infoText.visible = false;
-			copyrightText.visible = false;		
 		}
 	}
 }
