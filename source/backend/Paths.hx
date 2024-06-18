@@ -287,7 +287,7 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")		
 			suf = 'Guest';
-		if (PlayState.isBETADCIU && (song == 'kaboom' || song == 'triple-trouble'))		
+		if (PlayState.isBETADCIU && (songLowercase == 'kaboom' || songLowercase == 'triple-trouble'))		
 			suf = 'BETADCIU';
 
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
