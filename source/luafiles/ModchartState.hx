@@ -2287,7 +2287,15 @@ class ModchartState
 				//The string does absolutely nothing
 				//PlayState.instance.defaultCamFollow = true;
 			});
-	
+
+			Lua_helper.add_callback(lua,"cameraSnap", function(camera:String, x:Float, y:Float) {
+				PlayState.instance.isCameraOnForcedPos = true;
+				
+				var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
+				camPosition.setPosition(x, y);
+				LuaUtils.cameraFromString(camera).focusOn(camPosition.getPosition());
+			});
+			
 			Lua_helper.add_callback(lua,"stopCameraEffects", function(id:String) { //how convenient
 				LuaUtils.cameraFromString(id).stopFX();
 			});
