@@ -798,19 +798,29 @@ class Paths
 		#end
 	}
 
-	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
-	{		
-		#if desktop
-		if(FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
-			return true;
+	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String = null)
+	{
+		#if MODS_ALLOWED
+		if(!ignoreMods)
+		{
+			for(mod in Mods.getGlobalMods())
+				if (FileSystem.exists(mods('$mod/$key')))
+					return true;
+
+			if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
+				return true;
+			
+			if (FileSystem.exists(mods('$key')))
+				return true;
 		}
 		#end
-		
-		if(OpenFlAssets.exists(Paths.getPath(key, type))) {
+
+		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
 			return true;
 		}
 		return false;
 	}
+
 
 	//return graphic didn't work for me so...
 	inline static public function existsInCTA(key:String)

@@ -4435,7 +4435,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		if (ClientPrefs.data.psychUI){
-			scoreTxt.text = 'Score: ' + numberWithCommas(songScore) + ' • Accuracy: ' + ratingPercent * 100 + '% • Combo Breaks: ' + songMisses + ' • Rank: ' + ratingFC;//peeps wanted no integer rating
+			scoreTxt.text = '( Score: ' + numberWithCommas(songScore) + ' • Accuracy: ' + ratingPercent * 100 + '% • Combo Breaks: ' + songMisses + ' • Rank: ' + ratingFC + ' )';//peeps wanted no integer rating
 		}else
 			scoreTxt.text = Ratings.CalculateRanking(songScore,songScoreDef,nps,maxNPS,accuracy);
 

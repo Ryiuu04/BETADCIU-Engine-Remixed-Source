@@ -1,14 +1,15 @@
 package states;
 
+import openfl.utils.Assets as OpenFlAssets;
 import objects.AttachedSprite;
-import objects.HealthIcon;
+//import objects.HealthIcon;
 
 class CreditsState extends MusicBeatState
 {
 	var curSelected:Int = -1;
 
 	private var grpOptions:FlxTypedGroup<Alphabet>;
-	private var iconArray:Array<HealthIcon> = [];
+	private var iconArray:Array<AttachedSprite> = [];
 	private var creditsStuff:Array<Array<String>> = [];
 
 	var bg:FlxSprite;
@@ -88,20 +89,23 @@ class CreditsState extends MusicBeatState
 				var str:String = 'credits/missing_icon';
 				if(creditsStuff[i][1] != null && creditsStuff[i][1].length > 0)
 				{
-					var fileName = Paths.image('icons/credits/' + creditsStuff[i][1]);
-					iconPath = fileName;
-					if (FileSystem.exists(Paths.image('icons/credits/icon-' + creditsStuff[i][1]))) str = Paths.image('icons/credits/icon-' + creditsStuff[i][1]);
-					else if (FileSystem.exists(Paths.image('icons/credits/icon-' + creditsStuff[i][1] + '-pixel'))) str = Paths.image('icons/credits/icon-' + creditsStuff[i][1]) + '-pixel';
+					/*var fileName = creditsStuff[i][1];
+					if (FileSystem.exists(Paths.image('credits/$fileName'))) str = 'credits/$fileName';
+					else if (FileSystem.exists(Paths.image('credits/$fileName-pixel'))) str = 'credits/$fileName-pixel';*/
+
+					var fileName = creditsStuff[i][1];
+					if (FileSystem.exists(Paths.getSharedPath('images/credits/$fileName.png'))){ str = 'credits/$fileName'; trace(Paths.getSharedPath('images/$str.png'));}
+					else if (FileSystem.exists(Paths.getSharedPath('images/credits/$fileName-pixel.png'))){ str = 'credits/$fileName-pixel'; trace(Paths.getSharedPath('images/$str-pixel.png'));}
 				}
 
-				/*var icon:AttachedSprite = new AttachedSprite(str);
+				var icon:AttachedSprite = new AttachedSprite(str);
 				if(str.endsWith('-pixel')) icon.antialiasing = false;
 				icon.xAdd = optionText.width + 10;
-				icon.sprTracker = optionText;*/
-	
-				var icon:HealthIcon = new HealthIcon(creditsStuff[i][1]);
-				icon.x = optionText.width + 10;
 				icon.sprTracker = optionText;
+	
+				/*var icon:HealthIcon = new HealthIcon(creditsStuff[i][1]);
+				icon.x = optionText.width + 10;
+				icon.sprTracker = optionText;*/
 
 				// using a FlxGroup is too much fuss!
 				iconArray.push(icon);

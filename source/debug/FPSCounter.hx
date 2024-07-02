@@ -34,7 +34,7 @@ class FPSCounter extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat(Assets.getFont(Paths.font("phantomMuff.ttf")).fontName, 14, color);
+		defaultTextFormat = new TextFormat(Assets.getFont(Paths.font("phantomMuff.ttf")).fontName, 12, color, true);
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
@@ -64,7 +64,7 @@ class FPSCounter extends TextField
 
 	public dynamic function updateText():Void { // so people can override it in hscript
 		text = 'FPS: ${currentFPS}'
-		+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+		+ ' | Memory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
 
 		textColor = 0xFFFFFFFF;
 		if (currentFPS < FlxG.drawFramerate * 0.5)
