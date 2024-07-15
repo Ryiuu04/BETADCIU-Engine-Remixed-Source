@@ -2893,7 +2893,7 @@ class ModchartState
 				}
 	
 				var killMe:Array<String> = obj.split('.');
-				var object:FlxSprite = changeSpriteClass(LuaUtils.getObjectDirectly(killMe[0]));
+				var object:FlxBasic = LuaUtils.getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
 				}
@@ -3088,13 +3088,10 @@ class ModchartState
 				if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
 			});
 	
-			Lua_helper.add_callback(lua, "addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-				return addAnimByIndices(obj, name, prefix, indices, framerate, false);
+			Lua_helper.add_callback(lua, "addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:Any, framerate:Int = 24, loop:Bool = false) {
+				return LuaUtils.addAnimByIndices(obj, name, prefix, indices, framerate, loop);
 			});
-			Lua_helper.add_callback(lua, "addAnimationByIndicesLoop", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-				return addAnimByIndices(obj, name, prefix, indices, framerate, true);
-			});
-	
+
 			Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
 				if(LuaUtils.getObjectDirectly(obj)!=null) {
 					var cock:FlxSprite = LuaUtils.getObjectDirectly(obj);
