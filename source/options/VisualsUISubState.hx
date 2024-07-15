@@ -92,7 +92,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
 
-		/*var option:Option = new Option('Rainbow FPS',
+		/*var option:Option = new Option('Rainbow FPS', //this option is isn't even working so i'll just comment it
 			'If checked and FPS Counter is enabled, counter will have rainbow colors!',
 			'fpsRain',
 			'bool');

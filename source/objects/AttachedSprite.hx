@@ -27,10 +27,10 @@ class AttachedSprite extends FlxSprite
 		} else if(file != null) {
 			if(FileSystem.exists(Paths.getSharedPath('images/$file.png'))){//shared check...
 				loadGraphic(Paths.getSharedPath('images/$file.png'));//shared check...
-				trace(Paths.getSharedPath('images/$file.png'));
+				//trace(Paths.getSharedPath('images/$file.png'));
 			}else{
 				loadGraphic(Paths.image(file));
-				trace(Paths.image(file));
+				//trace(Paths.image(file));
 			}
 		}
 		antialiasing = FlxG.save.data.antialiasing;

@@ -406,6 +406,10 @@ class TitleState extends MusicBeatState
 					createCoolText([curWacky[0]]);
 				case 11:
 					addMoreText(curWacky[1]);
+					if (curWacky[1].contains('uncorruption'))
+					{
+						//Main.restoreUnlocked = true;
+					}
 				case 12:
 					deleteCoolText();
 				case 13:

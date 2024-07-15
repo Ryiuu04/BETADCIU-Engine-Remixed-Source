@@ -3320,7 +3320,7 @@ class PlayState extends MusicBeatState
 				spr.updateHitbox();
 			}
 		}
-
+	
 		var iconOffset:Int = 26;
 		var healthPercent:Float = FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01;
 		iconP1.x = FlxMath.lerp(iconP1.x, healthBar.x + (healthBar.width * healthPercent - iconOffset), 0.15/(ClientPrefs.data.framerate / 60));
@@ -3392,6 +3392,9 @@ class PlayState extends MusicBeatState
 					}
 					if(ClientPrefs.data.timeBarType == 'Song Name'){//quick fix!
 						timeTxt.text = SONG.song;
+					}
+					if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
+						timeTxt.text = SONG.song + "(" + FlxStringUtil.formatTime(secondsTotal, false) + ")";
 					}
 				}
 			}
@@ -4653,10 +4656,8 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
-		if (!note.wasGoodHit && !note.isSustainNote)//idk if this will work.
-		{
+		if (!note.wasGoodHit && !note.isSustainNote)
 			doScoreBop();
-		}	
 
 		// add newest note to front of notesHitArray
 		// the oldest notes are at the end and are removed first
@@ -5279,7 +5280,7 @@ class PlayState extends MusicBeatState
 	public var opponentIconScale:Float = 1.2;
 	public var playerIconScale:Float = 1.2;
 	public var iconBopSpeed:Int = 1;
-	public var canIconBop:Bool = true;
+	public var canIconBop:Bool = true;//this is useful, change my mind.
 
 	override function beatHit()
 	{
@@ -5315,7 +5316,6 @@ class PlayState extends MusicBeatState
 				iconP1.updateHitbox();
 				iconP2.updateHitbox();
 			}
-		}
 
 		if (gf != null) {
 			danceIfPossible(gf);

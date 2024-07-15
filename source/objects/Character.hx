@@ -279,7 +279,7 @@ class Character extends FunkinSprite
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2){
 					healthColorArray = json.healthbar_colors;
 				}
-
+					
 				vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 				colorPreCut = colorPreString.toHexString();
@@ -738,4 +738,16 @@ class Character extends FunkinSprite
 		curColor = Color;
 		return super.set_color(Color);
 	}
+
+	public override function destroy()
+	{
+		super.destroy();
+		destroyAtlas();
+	}
+	
+	public function destroyAtlas()
+	{
+		if (atlasChar != null)
+			atlasChar = FlxDestroyUtil.destroy(atlasChar);
+	}	
 }

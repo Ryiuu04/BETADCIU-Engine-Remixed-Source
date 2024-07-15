@@ -84,7 +84,7 @@ import states.TitleState;
 	public var violence:Bool = true;
 	public var stageChange:Bool = true;
 	public var uncacheCharacterSwitch:Bool = false;
-	public var showNextSection:Bool = false;
+	public var showNextSection:Bool = true;
 
 	public var botplay:Bool = false;
 	public var songPosition:Bool = false;

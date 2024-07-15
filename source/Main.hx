@@ -96,7 +96,7 @@ class Main extends Sprite
 		
 		game = new FlxGame(gameWidth, gameHeight, initialState, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen);
 
-		    // FlxG.game._customSoundTray wants just the class, it calls new from
+		// FlxG.game._customSoundTray wants just the class, it calls new from
 		// create() in there, which gets called when it's added to stage
 		// which is why it needs to be added before addChild(game) here
 		@:privateAccess

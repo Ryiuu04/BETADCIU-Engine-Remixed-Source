@@ -39,7 +39,7 @@ class MainMenuState extends MusicBeatState
 
 	public static var kadeEngineVer:String = "BETADCIU Engine";
 	public static var gameVer:String = "0.2.8";
-	public static var betadciuVer:String = "1.8";
+	public static var betadciuVer:String = "1.8.1";
 	public static var remixedVer:String = "1.0";
 
 	var bg:FlxSprite;
@@ -272,7 +272,6 @@ class MainMenuState extends MusicBeatState
 									case 'freeplay':
 										MusicBeatState.switchState(new FreeplayState());
 										trace("Freeplay Menu Selected");
-
 								}
 							});
 						}
