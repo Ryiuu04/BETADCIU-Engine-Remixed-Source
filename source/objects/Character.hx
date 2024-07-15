@@ -40,6 +40,7 @@ typedef CharacterFile = {
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
+	var vocals_file:String;
 	var noteSkin:String;
 	var isPlayerChar:Bool;
 
@@ -103,6 +104,7 @@ class Character extends FunkinSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
+	public var vocalsFile:String = '';
 	public var positionArray:Array<Float> = [0, 0];
 	public var playerPositionArray:Array<Float> = [0, 0];
 	public var cameraPosition:Array<Float> = [0, 0];
@@ -207,7 +209,7 @@ class Character extends FunkinSprite
 				spriteType = (json.spriteType != null ? json.spriteType.toUpperCase() : "SPARROW");
 
 				#if flxanimate
-				var animToFind:String = Paths.getPath('images/' + imageFile + '/Animation.json', TEXT, null, true);
+				var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT, null, true);
 				if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)){
 					useAtlas = true;
 					preloadImageFile = preloadImageFile + "/spritemap";
@@ -277,7 +279,8 @@ class Character extends FunkinSprite
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2){
 					healthColorArray = json.healthbar_colors;
 				}
-					
+
+				vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 				colorPreCut = colorPreString.toHexString();
 				iconColor = colorPreCut.substring(2);
@@ -720,4 +723,16 @@ class Character extends FunkinSprite
 		currentIndex += amount;
 		return theArray;
 	}
+
+	public override function destroy()
+	{
+		super.destroy();
+		destroyAtlas();
+	}
+	
+	public function destroyAtlas()
+	{
+		if (atlasChar != null)
+			atlasChar = FlxDestroyUtil.destroy(atlasChar);
+	}	
 }

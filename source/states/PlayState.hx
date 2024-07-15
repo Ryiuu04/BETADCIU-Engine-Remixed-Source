@@ -203,6 +203,7 @@ class PlayState extends MusicBeatState
 
 	public var vocals:FlxSound;
 	public var inst:FlxSound;
+	public var opponentVocals:FlxSound;
 
 	public var dad:Character;
 	public var gf:Character;
@@ -1104,8 +1105,9 @@ class PlayState extends MusicBeatState
 
 		setOnLuas("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
 		setOnLuas('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
-		callOnScripts('start', []);			
-		callOnScripts('onCreate', []); //psych	
+		callOnScripts('start', []);	
+		callOnLuas('onCreate', []);	//psych
+		//callOnScripts('onCreate', []); //psych | using callOnScripts here calls onCreate twice on HScripts lmao
 
 		if ((isStoryMode || showCutscene))
 		{
@@ -1253,6 +1255,7 @@ class PlayState extends MusicBeatState
 				paused = true;
 					
 				vocals.stop();
+				opponentVocals.stop();
 				FlxG.sound.music.stop();
 
 				var daX = boyfriend.getScreenPosition().x;
@@ -2396,6 +2399,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.music.pause();
 		vocals.pause();
+		opponentVocals.pause();
 
 		FlxG.sound.music.time = time;
 		FlxG.sound.music.play();
@@ -2405,9 +2409,13 @@ class PlayState extends MusicBeatState
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = time;
+			opponentVocals.time = time;
+
 			FlxG.sound.music.pitch = playbackRate;
+			opponentVocals.pitch = playbackRate;
 		}
 		vocals.play();
+		opponentVocals.play();
 	
 		songTime = time;
 	}
@@ -2693,6 +2701,7 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.pitch = playbackRate;
 		FlxG.sound.music.onComplete = songOutro;
 		vocals.play();
+		opponentVocals.play();
 
 		if (ClientPrefs.data.psychUI && startOnTime <= 0)
 		{
@@ -2715,6 +2724,7 @@ class PlayState extends MusicBeatState
 			//trace('Oopsie doopsie! Paused sound');
 			FlxG.sound.music.pause();
 			vocals.pause();
+			opponentVocals.pause();
 		}
 
 		// Song duration in a float, useful for the time left feature
@@ -2784,6 +2794,8 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
+		vocals = new FlxSound();
+		opponentVocals = new FlxSound();
 		if (SONG.needsVoices)
 		{
 			if (!Assets.exists(Paths.voices(PlayState.SONG.song)))
@@ -2798,6 +2810,19 @@ class PlayState extends MusicBeatState
 		}		
 		else
 			vocals = FlxG.sound.list.recycle(FlxSound);
+		
+		/*try
+		{
+			if (SONG.needsVoices)
+			{
+				var playerVocals = Paths.voicesPsych(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voicesPsych(songData.song));
+				
+				var oppVocals = Paths.voicesPsych(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+				if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
+			}
+		}
+		catch(e:Dynamic) {}*/
 
 		trace('loaded vocals');
 
@@ -2903,6 +2928,7 @@ class PlayState extends MusicBeatState
 				var newCharacter:String = event.value2;
 				preloadChar = new Character(0, 0, newCharacter);
 				startCharacterLua(preloadChar.curCharacter);
+				preloadChar.destroyAtlas();//no way this will fix the problem. | holy shit it did!
 				case 'Change Stage':
 					if (event.value1 == curStage)
 						return;
@@ -3064,6 +3090,7 @@ class PlayState extends MusicBeatState
 			{
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 			}
 
 			#if desktop
@@ -3126,6 +3153,7 @@ class PlayState extends MusicBeatState
 	public function resyncVocals():Void
 	{
 		vocals.pause();
+		opponentVocals.pause();
 
 		FlxG.sound.music.play();
 		FlxG.sound.music.pitch = playbackRate;
@@ -3135,7 +3163,14 @@ class PlayState extends MusicBeatState
 			vocals.time = Conductor.songPosition;
 			vocals.pitch = playbackRate;
 		}
+
+		if (Conductor.songPosition <= opponentVocals.length)
+		{
+			opponentVocals.time = Conductor.songPosition;
+			opponentVocals.pitch = playbackRate;
+		}	
 		vocals.play();
+		opponentVocals.play();
 
 		#if desktop
 		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
@@ -3197,6 +3232,7 @@ class PlayState extends MusicBeatState
 			if(FlxG.sound.music != null) {
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 			}
 
 			isPaused = true;
@@ -3705,6 +3741,8 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.volume = 0;
 		vocals.volume = 0;
 		vocals.pause();
+		opponentVocals.volume = 0;
+		opponentVocals.pause();
 		canPause = false;
 		updateTime = false;
 		endingSong = true;
@@ -4571,6 +4609,7 @@ class PlayState extends MusicBeatState
 			time += 0.15;
 		}
 
+		if(opponentVocals.length <= 0) vocals.volume = 1;
 		StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time);
 		note.hitByOpponent = true;
 
@@ -5108,6 +5147,7 @@ class PlayState extends MusicBeatState
 		if(generatedMusic)
 		{
 			if(vocals != null) vocals.pitch = value;
+			if(opponentVocals != null) opponentVocals.pitch = value;
 			FlxG.sound.music.pitch = value;
 		}
 		playbackRate = value;
@@ -5557,7 +5597,7 @@ class PlayState extends MusicBeatState
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);
-		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.strumTime, subEvent.value3 != null ? subEvent.value3 : '']);
+		callOnScripts('onEventPushed', [subEvent.event, subEvent.value1 != null ? subEvent.value1 : '', subEvent.value2 != null ? subEvent.value2 : '', subEvent.value3 != null ? subEvent.value3 : '', subEvent.strumTime]);
 	}
 
 	public function invalidateNote(note:Note):Void {

@@ -50,17 +50,8 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		menuItems = menuItemsOG;
 
-		/*pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
-		pauseMusic.volume = 0;
-		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));*/
-
-		pauseMusic = new FlxSound();
-		try
-		{
-			var pauseSong:String = getPauseSong();
-			if(pauseSong != null) pauseMusic.loadEmbedded(Paths.music(pauseSong), true, true);
-		}
-		catch(e:Dynamic) {}
+		var pauseSong:String = getPauseSong();
+		pauseMusic = new FlxSound().loadEmbedded(Paths.music(pauseSong), true, true);
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
 

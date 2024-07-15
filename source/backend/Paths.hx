@@ -293,6 +293,15 @@ class Paths
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
 	}
 
+	inline static public function voicesPsych(song:String, postfix:String = null):Any//sry blant
+	{
+		var songKey:String = '${formatToSongPath(song)}/Voices';
+		if(postfix != null) songKey += '-' + postfix;
+		//trace('songKey test: $songKey');
+		var voices = returnSound(null, songKey, 'songs');
+		return voices;
+	}	
+
 	inline static public function inst(song:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
