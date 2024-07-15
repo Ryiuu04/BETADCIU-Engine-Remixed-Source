@@ -5316,6 +5316,7 @@ class PlayState extends MusicBeatState
 				iconP1.updateHitbox();
 				iconP2.updateHitbox();
 			}
+		}
 
 		if (gf != null) {
 			danceIfPossible(gf);

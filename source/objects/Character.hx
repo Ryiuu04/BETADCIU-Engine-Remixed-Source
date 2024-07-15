@@ -738,16 +738,4 @@ class Character extends FunkinSprite
 		curColor = Color;
 		return super.set_color(Color);
 	}
-
-	public override function destroy()
-	{
-		super.destroy();
-		destroyAtlas();
-	}
-	
-	public function destroyAtlas()
-	{
-		if (atlasChar != null)
-			atlasChar = FlxDestroyUtil.destroy(atlasChar);
-	}	
 }

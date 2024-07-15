@@ -121,13 +121,13 @@ class CustomLoading extends MusicBeatState
         if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload" + suf)))
         {
             var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload" + suf));
-            toBeDone += characters.length;
+            toCache += characters.length;
         }
 
         if (FileSystem.exists(Paths.txt(PlayState.SONG.song  + "/preload-stage" + suf)))
         {
             var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(PlayState.SONG.song  + "/preload-stage" + suf));
-            toBeDone += characters.length;
+            toCache += characters.length;
         }
 
 		initLoop = new FlxAsyncLoop(toCache, cacheItem, 1);

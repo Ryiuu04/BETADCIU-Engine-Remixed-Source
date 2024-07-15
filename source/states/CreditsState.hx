@@ -43,8 +43,8 @@ class CreditsState extends MusicBeatState
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 
 			['BETADCIU Engine Credits'],
-			['Ryiuu',				'ryv',				'BETADCIU Engine Remixed',			 						 'https://twitter.com/Ryiuu01',		    '64A250'],
-			['Blantados',			'blantad',			'OG BETADCIU Engine',			 							 'https://twitter.com/Blantados',		'64A250'],
+			['Ryiuu',				'ryv',				'BETADCIU Engine Remixed',			 						 'https://twitter.com/Ryiuu01',		    '757bef'],
+			['Blantados',			'blantad',			'OG BETADCIU Engine',			 							 'https://twitter.com/Blantados',		'64b3fe'],
 			[''],
 			['Kade Engine Credits'],
 			['KadeDev',				'kade',				'Kade Engine Legacy',			 							 'https://twitter.com/kade0912',		'64A250'],

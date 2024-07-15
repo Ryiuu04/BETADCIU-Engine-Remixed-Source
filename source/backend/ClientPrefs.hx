@@ -11,9 +11,6 @@ import states.TitleState;
 
 // Add a variable here and it will get automatically saved
 @:structInit class SaveVariables {
-	public var stageChange:Bool = true;
-	public var uncacheCharacterSwitch:Bool = false;
-
 	public var downscroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
