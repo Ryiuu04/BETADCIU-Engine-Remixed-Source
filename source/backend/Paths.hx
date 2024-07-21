@@ -251,8 +251,6 @@ class Paths
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstAlt'))))
-			suf = 'Alt';	
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -333,8 +331,6 @@ class Paths
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && song.toLowerCase() == "sharkventure")
-			pre = 'Alt_';		
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -671,6 +667,12 @@ class Paths
 
 		trace('cacheImage: You failed dipshit! Key '+key+" not found!");
 		return null;		
+	}
+
+	public static function addToExclusionsList(key:String) {
+		localTrackedAssets.push(key);
+		dumpExclusions.push(key);
+		trace("added: " + key + " to the exclusions list!");
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
