@@ -2834,7 +2834,63 @@ class ModchartState
 				return true;
 				#end
 			});
-	
+
+			Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String, ?shouldLoop:Bool, ?muted:Bool) {
+                // I hate you FlxVideoSprite....
+                #if VIDEOS_ALLOWED
+                tag = tag.replace('.', '');
+                LuaUtils.resetSpriteTag(tag);
+                var sonic:Dynamic = null;
+                var leVSprite:PsychVideoSprite = null;
+                if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
+
+                    leVSprite = new PsychVideoSprite();
+                    leVSprite.addCallback('onFormat',()->{
+                        leVSprite.setPosition(x,y);
+                        leVSprite.cameras = [LuaUtils.cameraFromString(camera)];
+                    });
+                    leVSprite.addCallback('onEnd',()->{
+                        if (Stage.instance.swagBacks.exists(tag)) {
+                            Stage.instance.swagBacks.get(tag).destroy();
+                            Stage.instance.swagBacks.remove(tag);
+                        }
+
+                        if (PlayState.instance.modchartSprites.exists(tag)) {
+                            PlayState.instance.modchartSprites.get(tag).destroy();
+                            PlayState.instance.modchartSprites.remove(tag);
+                        }
+
+                        PlayState.instance.callOnLuas('onVideoFinished', [tag]);
+                    });
+                    var options:Array<String> = [];
+                    if (shouldLoop) options.push(PsychVideoSprite.looping);
+                    if (muted) options.push(PsychVideoSprite.muted);
+
+                    leVSprite.load(Paths.video(videoFile), options);
+                    leVSprite.antialiasing = true;
+                    leVSprite.play();
+
+                    sonic = leVSprite;
+                }
+
+                if (leVSprite == null) {
+                    var daFix:ModchartSprite = new ModchartSprite(x, y);
+                    sonic = daFix;
+                    luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
+                }
+
+                if (isStageLua && !preloading){
+                    Stage.instance.swagBacks.set(tag, sonic);
+                }
+                else{
+                    PlayState.instance.modchartSprites.set(tag, sonic);
+                }
+                sonic.active = true;
+                #else
+                luaTrace('Nuh Uh!!... - Platform not supported!');
+                #end
+            });
+			
 			Lua_helper.add_callback(lua, "endSong", function(hmm:String) {
 				PlayState.instance.KillNotes();
 				PlayState.instance.endSong();

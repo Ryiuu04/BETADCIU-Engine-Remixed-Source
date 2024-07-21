@@ -130,6 +130,21 @@ class Paths
         return data;
 	}
 
+	inline static public function exists(asset:String, ?type:lime.utils.AssetType)	
+	{
+		#if sys 
+		if (FileSystem.exists(asset)) {
+			return true;
+		}
+		#end
+		if (Assets.exists(asset, type)) {
+			return true;
+		}
+
+		return false;
+		
+	}
+
 	inline static public function lua(key:String,?library:String)
 	{
 		if(FileSystem.exists(Paths.modFolders('data/' + key + '.lua')))
@@ -249,32 +264,33 @@ class Paths
 		return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Inst'+suf+'.$SOUND_EXT');
 	}
 
-	inline static public function voices2(song:String, ?library:String)
-	{
-		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
+	inline static public function voices2(song:String, postfix:String = null, ?library:String/*this library shit is even used?*/)
+    {
+        var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
 
 		var pre:String = "";
 		var suf:String = "";
 
-		if (PlayState.isNeonight)
-			suf = 'NN';
-		if (PlayState.isVitor)		
-			suf = 'V';
-		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))		
-			suf = 'Guest';
-		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
-			suf = 'BETADCIU';
+        if (PlayState.isNeonight)
+            suf = 'NN';
+        if (PlayState.isVitor)        
+            suf = 'V';
+        if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))        
+            suf = 'Guest';
+        if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
+            suf = 'BETADCIU';
+        if (postfix != null) suf += '-' + postfix;
 
-		if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf)))
-		{
-			returnSound('songs', '${songLowercase}/'+pre+'Voices'+suf);
-			return Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf);
-		}
-			
-		return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT');
-	}
+        if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf)))
+        {
+            returnSound('songs', '${songLowercase}/'+pre+'Voices'+suf);
+            return Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf);
+        }
+            
+        return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT');
+    }
 
-	inline static public function voices(song:String)
+	inline static public function voices(song:String, ?postfix:String = null)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
 
@@ -287,9 +303,10 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")		
 			suf = 'Guest';
-		if (PlayState.isBETADCIU && (songLowercase == 'kaboom' || songLowercase == 'triple-trouble'))		
+		if (PlayState.isBETADCIU)		
 			suf = 'BETADCIU';
-
+		if (postfix != null) suf += '-' + postfix;
+	
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
 	}
 

@@ -128,6 +128,7 @@ using StringTools;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
 #else import vlc.MP4Handler as VideoHandler; #end
+import objects.PsychVideoSprite;
 #end
 
 class PlayState extends MusicBeatState
@@ -526,7 +527,7 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "Paused - " + detailsText;
 
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRankPsych(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
 		#end
 
 		// var gameCam:FlxCamera = FlxG.camera;
@@ -2789,39 +2790,49 @@ class PlayState extends MusicBeatState
 
 		vocals = new FlxSound();
 		opponentVocals = new FlxSound();
-		if (SONG.needsVoices)
-		{
-			if (!Assets.exists(Paths.voices(PlayState.SONG.song)))
-			{
-				if (Paths.currentTrackedSounds.exists(Paths.voices2(PlayState.SONG.song)))
-					vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.get(Paths.voices2(PlayState.SONG.song)));
-				else
-					vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Sound.fromFile(Paths.voices2(PlayState.SONG.song)));
-			}
-			else
-				vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
-		}		
-		else
-			vocals = FlxG.sound.list.recycle(FlxSound);
-		
-		/*try
-		{
-			if (SONG.needsVoices)
-			{
-				var playerVocals = Paths.voicesPsych(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voicesPsych(songData.song));
-				
-				var oppVocals = Paths.voicesPsych(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-				if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
-			}
-		}
-		catch(e:Dynamic) {}*/
+        try
+        {
+            if (SONG.needsVoices)//WHY THERES SO MANY VOICES FUNCTIONS
+            {
+                var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+                if (!Assets.exists(playerVocals)) playerVocals = null;
 
+                var playerVocals2 = Paths.voices2(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+                if (!FileSystem.exists(playerVocals2)) playerVocals2 = null;
+
+                if (!Assets.exists(playerVocals))
+                    if (FileSystem.exists(playerVocals2)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(playerVocals2) ? Paths.currentTrackedSounds.get(playerVocals2) : Sound.fromFile(playerVocals2));
+                else if (!FileSystem.exists(playerVocals2))
+                    if (Assets.exists(playerVocals)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(playerVocals);
+
+				if(playerVocals == null && playerVocals2 == null){ //don't talk to me.
+					if (!Assets.exists(Paths.voices(PlayState.SONG.song))){
+						if (Paths.currentTrackedSounds.exists(Paths.voices2(PlayState.SONG.song)))
+							vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.get(Paths.voices2(PlayState.SONG.song)));
+						else
+							vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Sound.fromFile(Paths.voices2(PlayState.SONG.song)));
+					}else
+						vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
+				}
+
+                var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+                var oppVocals2 = Paths.voices2(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+
+                if (!Assets.exists(oppVocals))
+                    if (FileSystem.exists(oppVocals2)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(oppVocals2) ? Paths.currentTrackedSounds.get(oppVocals2) : Sound.fromFile(oppVocals2));
+                else
+                    if (Assets.exists(oppVocals)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(oppVocals);
+            }
+        }
+        catch(e:Dynamic) {}
+		
 		trace('loaded vocals');
 
-		vocals.looped = false;
-		vocals.pitch = playbackRate;
-		FlxG.sound.list.add(vocals);
+        vocals.looped = false;
+        vocals.pitch = playbackRate;
+        opponentVocals.pitch = playbackRate;
+        FlxG.sound.list.add(vocals);
+        FlxG.sound.list.add(opponentVocals);
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
@@ -3135,6 +3146,10 @@ class PlayState extends MusicBeatState
 			for (timer in modchartTimers) {
 				timer.active = true;
 			}
+
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalResume();
+			#end
 			
 			callOnScripts('onResume');
 		}
@@ -3227,6 +3242,10 @@ class PlayState extends MusicBeatState
 				vocals.pause();
 				opponentVocals.pause();
 			}
+
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalPause();
+			#end
 
 			isPaused = true;
 			openSubState(new substates.PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
@@ -4887,6 +4906,7 @@ class PlayState extends MusicBeatState
 				usedTimeTravel = true;
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 				Conductor.songPosition = skipExactly;
 				notes.forEachAlive(function(daNote:Note)
 				{
@@ -4908,6 +4928,8 @@ class PlayState extends MusicBeatState
 				FlxG.sound.music.play();
 				vocals.time = Conductor.songPosition;
 				vocals.play();
+				opponentVocals.time = Conductor.songPosition;
+				opponentVocals.play();
 				new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
 						usedTimeTravel = false;
@@ -4921,6 +4943,7 @@ class PlayState extends MusicBeatState
 				usedTimeTravel = true;
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 				Conductor.songPosition += 10000 * multiplier;
 				notes.forEachAlive(function(daNote:Note)
 				{
@@ -4942,6 +4965,8 @@ class PlayState extends MusicBeatState
 				FlxG.sound.music.play();
 				vocals.time = Conductor.songPosition;
 				vocals.play();
+				opponentVocals.time = Conductor.songPosition;
+				opponentVocals.play();
 				new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
 						usedTimeTravel = false;
