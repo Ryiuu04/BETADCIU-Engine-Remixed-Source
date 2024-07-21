@@ -40,6 +40,8 @@ import cutscenes.DialogueBoxPsych;
 import shaders.Shaders;
 import shaders.ColorSwap;
 
+import flxanimate.FlxAnimate;
+
 //why is detected's modchart confusing!?
 import luafiles.LuaClass.*;
 import luafiles.LuaClass.LuaNote;
@@ -54,7 +56,6 @@ import openfl.display.ShaderParameterType;
 
 import objects.*;
 import states.editors.ModpackMaker;
-import substates.PauseSubState;
 
 import backend.Song;
 import backend.Highscore;
@@ -965,8 +966,6 @@ class ModchartState
 		set('songLength', FlxG.sound.music.length);
 		set('seenCutscene', PlayState.seenCutscene);
 		set('scriptName', scriptName);
-
-		set('shadersEnabled', ClientPrefs.data.shaders);
 
 		if (PlayState.SONG != null)
 		{
@@ -2304,7 +2303,7 @@ class ModchartState
 				camPosition.setPosition(x, y);
 				LuaUtils.cameraFromString(camera).focusOn(camPosition.getPosition());
 			});
-			
+	
 			Lua_helper.add_callback(lua,"stopCameraEffects", function(id:String) { //how convenient
 				LuaUtils.cameraFromString(id).stopFX();
 			});
@@ -2895,22 +2894,14 @@ class ModchartState
 				PlayState.instance.KillNotes();
 				PlayState.instance.endSong();
 			});
-
-			Lua_helper.add_callback(lua, "restartSong", function(?skipTransition:Bool = false) {
-				PlayState.instance.persistentUpdate = false;
-				FlxG.camera.followLerp = 0;
-				PauseSubState.restartSong(skipTransition,false,false);
-				return true;
-			});
 	
 			//idk if I wanna add events. alright I added the ones that are usable without that much tinkering.
-			Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, arg3:Dynamic) {
+			Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, ?arg3:Dynamic = "") {
 				var value1:String = arg1;
 				var value2:String = arg2;
 				var value3:String = arg3;
-
+				
 				PlayState.instance.triggerEventNote(name, value1, value2, value3);
-				// trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2+ ', ' + value3);
 			});
 	
 			Lua_helper.add_callback(lua, "arrayContains", function(obj:String, value:Dynamic) {
@@ -3655,6 +3646,7 @@ class ModchartState
 
 			#if desktop DiscordClient.addLuaCallbacks(lua); #end
 			#if hscript HScript.implement(this); #end
+			#if flxanimate FlxAnimateFunctions.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TweenFunctions.implement(this);
 			TextFunctions.implement(this);
@@ -3746,10 +3738,10 @@ class ModchartState
 
 		switch(spriteType.toLowerCase().trim())
 		{
-			/*case "texture" | "textureatlas"|"tex":
-				spr.frames = AtlasFrameMaker.construct(image);
-			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = AtlasFrameMaker.construct(image, null, true);*/
+			// case "texture" | "textureatlas"|"tex":
+			// 	spr.frames = AtlasFrameMaker.construct(image);
+			// case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
+			// 	spr.frames = AtlasFrameMaker.construct(image, null, true);
 			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
 			default:

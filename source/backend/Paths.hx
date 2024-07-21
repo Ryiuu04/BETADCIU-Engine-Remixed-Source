@@ -1,6 +1,7 @@
 package backend;
 
 import flixel.graphics.frames.FlxAtlasFrames;
+import flxanimate.FlxAnimate;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.display.BitmapData;
@@ -242,10 +243,16 @@ class Paths
 	inline static public function inst2(song:String, ?library:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
+		switch (songLowercase) {
+			case 'dad-battle': songLowercase = 'dadbattle';
+			case 'philly-nice': songLowercase = 'philly';
+		}
 
 		var pre:String = "";
 		var suf:String = "";
 
+		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstAlt'))))
+			suf = 'Alt';	
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -293,6 +300,11 @@ class Paths
 	inline static public function voices(song:String, ?postfix:String = null)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
+			switch (songLowercase) {
+				case 'dad-battle': songLowercase = 'dadbattle';
+				case 'philly-nice': songLowercase = 'philly';	
+				case 'scary-swings': songLowercase = 'scary swings';
+			}
 
 		var pre:String = "";
 		var suf:String = "";
@@ -310,22 +322,19 @@ class Paths
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
 	}
 
-	inline static public function voicesPsych(song:String, postfix:String = null):Any//sry blant
-	{
-		var songKey:String = '${formatToSongPath(song)}/Voices';
-		if(postfix != null) songKey += '-' + postfix;
-		//trace('songKey test: $songKey');
-		var voices = returnSound(null, songKey, 'songs');
-		return voices;
-	}	
-
 	inline static public function inst(song:String)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
+			switch (songLowercase) {
+				case 'dad-battle': songLowercase = 'dadbattle';
+				case 'philly-nice': songLowercase = 'philly';
+			}
 
 		var pre:String = "";
 		var suf:String = "";
 
+		if (Main.noCopyright && song.toLowerCase() == "sharkventure")
+			pre = 'Alt_';		
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -664,12 +673,6 @@ class Paths
 		return null;		
 	}
 
-	public static function addToExclusionsList(key:String) {
-		localTrackedAssets.push(key);
-		dumpExclusions.push(key);
-		trace("added: " + key + " to the exclusions list!");
-	}
-
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if sys
@@ -771,10 +774,6 @@ class Paths
 		#end
 	}
 
-	inline static public function getTextureAtlas(key:String){
-        return Paths.image(key);
-    }
-
 	inline static public function getXMLAtlas(key:String, ?library:String) //idk what to call this one
 	{	#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
@@ -824,29 +823,19 @@ class Paths
 		#end
 	}
 
-	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String = null)
-	{
-		#if MODS_ALLOWED
-		if(!ignoreMods)
-		{
-			for(mod in Mods.getGlobalMods())
-				if (FileSystem.exists(mods('$mod/$key')))
-					return true;
-
-			if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
-				return true;
-			
-			if (FileSystem.exists(mods('$key')))
-				return true;
+	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
+	{		
+		#if desktop
+		if(FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
+			return true;
 		}
 		#end
-
-		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
+		
+		if(OpenFlAssets.exists(Paths.getPath(key, type))) {
 			return true;
 		}
 		return false;
 	}
-
 
 	//return graphic didn't work for me so...
 	inline static public function existsInCTA(key:String)
@@ -978,5 +967,89 @@ class Paths
 		}
 		return list;
 	}
+	#end
+
+	#if flxanimate
+	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+	{
+		var changedAnimJson = false;
+		var changedAtlasJson = false;
+		var changedImage = false;
+		
+		if(spriteJson != null)
+		{
+			changedAtlasJson = true;
+			spriteJson = File.getContent(spriteJson);
+		}
+
+		if(animationJson != null) 
+		{
+			changedAnimJson = true;
+			animationJson = File.getContent(animationJson);
+		}
+
+		// is folder or image path
+		if(Std.isOfType(folderOrImg, String))
+		{
+			var originalPath:String = folderOrImg;
+			for (i in 0...10)
+			{
+				var st:String = '$i';
+				if(i == 0) st = '';
+
+				if(!changedAtlasJson)
+				{
+					spriteJson = getTextFromFile('images/$originalPath/spritemap$st.json');
+					if(spriteJson != null)
+					{
+						trace('found Sprite Json');
+						changedImage = true;
+						changedAtlasJson = true;
+						folderOrImg = returnGraphic('$originalPath/spritemap$st');
+						break;
+					}
+				}
+				else if(fileExists('images/$originalPath/spritemap$st.png', IMAGE))
+				{
+					trace('found Sprite PNG');
+					changedImage = true;
+					folderOrImg = returnGraphic('$originalPath/spritemap$st');
+					break;
+				}
+			}
+
+			if(!changedImage)
+			{
+				trace('Changing folderOrImg to FlxGraphic');
+				changedImage = true;
+				folderOrImg = returnGraphic(originalPath);
+			}
+
+			if(!changedAnimJson)
+			{
+				trace('found Animation Json');
+				changedAnimJson = true;
+				animationJson = getTextFromFile('images/$originalPath/Animation.json');
+			}
+		}
+		
+		trace(folderOrImg);
+		//trace(spriteJson);
+		//trace(animationJson);
+
+		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
+	}
+
+	/*private static function getContentFromFile(path:String):String
+	{
+		var onAssets:Bool = false;
+		var path:String = Paths.getPath(path, TEXT, true);
+		if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
+		{
+			//trace('Found text: $path');
+			return !onAssets ? File.getContent(path) : Assets.getText(path);
+		}
+		return null;
+	}*/
 	#end
 }
