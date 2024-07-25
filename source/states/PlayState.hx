@@ -4417,7 +4417,7 @@ class PlayState extends MusicBeatState
 	{
 		if (note != null)
 		{
-			playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, note);
+			playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, daNote);
 		}
 		else
 		{
