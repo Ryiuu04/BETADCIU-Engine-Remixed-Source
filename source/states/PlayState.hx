@@ -85,6 +85,7 @@ import objects.HealthIcon;
 import objects.DeltaTrail;
 import objects.Note.EventNote;
 import objects.CharacterOffsets;
+import objects.HoldCover;
 
 #if sys
 import lime.media.AudioBuffer;
@@ -437,6 +438,11 @@ class PlayState extends MusicBeatState
 
 	public var engineDebugKeys:Array<FlxKey> = [FlxKey.ONE, FlxKey.TWO, FlxKey.THREE, FlxKey.FOUR, FlxKey.FIVE, FlxKey.SIX, FlxKey.SEVEN, FlxKey.EIGHT, FlxKey.NINE];
 	public static var inPlayState:Bool = false; //there's gotta be an easier way for this to be read.
+
+	public var opponentHoldCovers:HoldCover;
+  	public var playerHoldCovers:HoldCover;
+
+	public var enabledHolds:Bool = true;
 
 	override public function create()
 	{
@@ -859,6 +865,11 @@ class PlayState extends MusicBeatState
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 
+		opponentHoldCovers = new HoldCover(enabledHolds, false);
+		playerHoldCovers = new HoldCover(enabledHolds, true);
+		add(opponentHoldCovers);
+		add(playerHoldCovers);
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 		
@@ -980,9 +991,8 @@ class PlayState extends MusicBeatState
 		else
 			strumLineNotes.cameras = [camHUD];
 
-		//we gotta leave these two out
-		grpNoteSplashes.cameras = [camHUD];
-		notes.cameras = [camHUD];
+		//we gotta leave these out
+		playerHoldCovers.cameras = opponentHoldCovers.cameras = grpNoteSplashes.cameras = notes.cameras = [camHUD];
 
 		var objects:Array<String> = ['healthBar', 'healthBarBG', 'iconP1', 'iconP2', 'scoreTxt'];
 		
@@ -3511,6 +3521,9 @@ class PlayState extends MusicBeatState
 		
 		checkEventNote();
 
+		playerHoldCovers.updateHold(elapsed, enabledHolds);
+		opponentHoldCovers.updateHold(elapsed, enabledHolds);
+
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
 
@@ -4219,6 +4232,26 @@ class PlayState extends MusicBeatState
 		if (controls.UP_P){callOnLuas('keyPressed',["up"]);};
 		if (controls.RIGHT_P){callOnLuas('keyPressed',["right"]);};
 		#end
+
+		//RELEASES, check for hold covers
+		if (releaseArray.contains(true))
+		{
+			if (playerHoldCovers != null)
+			{
+				playerHoldCovers.forEach(function(spr:HoldCover.CoverSprite)
+				{
+					var idToInt:String = spr.spriteId;
+					var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
+					if (!releaseArray[sprId])
+					{
+						if (!spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
+						{
+							spr.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, sprId);
+						}
+					}
+			    });
+			}
+		}
 		
 		// HOLDS, check for sustain notes
 		if (holdArray.contains(true) && !boyfriend.stunned && generatedMusic)
@@ -4382,6 +4415,14 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, daNote:Note):Void
 	{
+		if (note != null)
+		{
+			playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, note);
+		}
+		else
+		{
+			playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction);
+		}
 		if (!boyfriend.stunned)
 		{
 			interupt = true;
@@ -4613,6 +4654,8 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 		
 		callOnLuas('dadNoteHit', [note.noteData, note.isSustainNote, note.noteType, note.dType]);
 		callOnLuas('playerTwoSing', [Math.abs(note.noteData), Conductor.songPosition]);
@@ -4725,6 +4768,8 @@ class PlayState extends MusicBeatState
 				char.playAnim(playerSingAnimations[note.noteData] + char.bfAltAnim, true);
 				char.holdTimer = 0;	
 			}
+
+			playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 		
 			if(!loadRep && note.mustPress)
 				saveNotes.push(HelperFunctions.truncateFloat(note.strumTime, 2));
