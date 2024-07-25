@@ -4245,7 +4245,7 @@ class PlayState extends MusicBeatState
 					var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
 					if (!releaseArray[sprId])
 					{
-						if (!spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
+						if (spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
 						{
 							spr.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, sprId);
 						}
