@@ -4247,7 +4247,9 @@ class PlayState extends MusicBeatState
 					{
 						if (spr.animation.curAnim != null && !spr.animation.curAnim.name.endsWith('p'))
 						{
-							spr.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, sprId);
+							spr.smoothSprite();
+							spr.visible = spr.boom = spr.isPlaying = false;
+							spr.animation.stop();
 						}
 					}
 			    });
