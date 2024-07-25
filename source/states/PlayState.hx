@@ -86,6 +86,7 @@ import objects.DeltaTrail;
 import objects.Note.EventNote;
 import objects.CharacterOffsets;
 import objects.HoldCover;
+import objects.HoldCover.CoverSprite;
 
 #if sys
 import lime.media.AudioBuffer;
@@ -4238,7 +4239,7 @@ class PlayState extends MusicBeatState
 		{
 			if (playerHoldCovers != null)
 			{
-				playerHoldCovers.forEach(function(spr:HoldCover.CoverSprite)
+				playerHoldCovers.forEach(function(spr:CoverSprite)
 				{
 					var idToInt:String = spr.spriteId;
 					var sprId:Int = Std.parseInt(idToInt.split("-")[1]);
@@ -4415,7 +4416,7 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, daNote:Note):Void
 	{
-		if (note != null)
+		if (daNote != null)
 		{
 			playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, daNote);
 		}

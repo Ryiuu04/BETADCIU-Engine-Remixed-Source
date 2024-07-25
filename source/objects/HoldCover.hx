@@ -121,7 +121,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
     if (enabled && isReady)
     {
       var data:Int = noteData;
-      this.members[data].smoothSpriteCopy();
+      this.members[data].smoothSprite();
       this.members[data].isPlaying = false;
       this.members[data].boom = false;
       this.members[data].visible = false;
