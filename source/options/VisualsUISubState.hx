@@ -26,6 +26,12 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Hold Covers',
+			"If unchecked, hitting \"Sustain\" notes won't show the \"Hold Cover\".",
+			'holdCovers',
+			'bool');
+		addOption(option);
+
 		var option:Option = new Option('Psych UI',
 			"If checked, changes the UI to resemble Psych Engine's.",
 			'psychUI',
