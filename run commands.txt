@@ -1,3 +1,5 @@
 haxelib set flixel 5.5.0
 haxelib set flixel-addons 3.2.1
 haxelib set openfl 9.3.3
+haxelib set hxvlc 1.2.0
+haxelib set lime 8.1.2

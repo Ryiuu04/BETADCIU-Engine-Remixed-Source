@@ -3300,7 +3300,8 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
 				var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-				makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+				if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+				else luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			});
 	
 			Lua_helper.add_callback(lua, "makeLuaTrail", function(tag:String, character:String, color:String) {

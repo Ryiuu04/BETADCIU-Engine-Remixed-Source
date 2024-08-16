@@ -426,6 +426,7 @@ class PlayState extends MusicBeatState
 	public var isPaused:Bool = false; //because sometimes you used paused without actually pausing the game
 
 	public var playbackRate(default, set):Float = 1;
+	public var canPlayMissSound:Bool = true;
 
 	public var songSpeedTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
@@ -4454,7 +4455,7 @@ class PlayState extends MusicBeatState
 
 			songScore -= 10;
 
-			FlxG.sound.play(existsInCTS('missnote'+FlxG.random.int(1,3)), FlxG.random.float(0.1, 0.2));
+			if(canPlayMissSound) FlxG.sound.play(existsInCTS('missnote'+FlxG.random.int(1,3)), FlxG.random.float(0.1, 0.2));
 
 			var dType:Int = 0;
 			var char:Character = boyfriend;
