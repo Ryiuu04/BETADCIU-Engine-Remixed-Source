@@ -69,18 +69,12 @@ class CustomFadeTransition extends MusicBeatSubstate
 		}
 
 		//quick fix for the character editor/stage editor
-			var transitionCamera = new FlxCamera();
-			transitionCamera.bgColor.alpha = 0;
-			FlxG.cameras.add(transitionCamera, false);
+		var transitionCamera = new FlxCamera();
+		transitionCamera.bgColor.alpha = 0;
+		FlxG.cameras.add(transitionCamera, false);
 
-			transitionSprite.cameras = [transitionCamera];
+		transitionSprite.cameras = [transitionCamera];
 		//
-
-		/*if (nextCamera != null)
-		{
-			transitionSprite.cameras = [nextCamera];
-		}
-		nextCamera = null;*/
 	}
 
 	override function update(elapsed:Float)

@@ -206,8 +206,8 @@ class PlayState extends MusicBeatState
 	#end
 
 	public var vocals:FlxSound;
-	public var inst:FlxSound;
 	public var opponentVocals:FlxSound;
+	public var inst:FlxSound;
 
 	public var dad:Character;
 	public var gf:Character;
@@ -1109,11 +1109,10 @@ class PlayState extends MusicBeatState
 
 		playerSingAnimations = singAnimations;
 
-		setOnLuas("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
-		setOnLuas('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
-		callOnScripts('start', []);	
-		callOnLuas('onCreate', []);	//psych
-		//callOnScripts('onCreate', []); //psych | using callOnScripts here calls onCreate twice on HScripts lmao
+		setOnScripts("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
+		setOnScripts('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
+		callOnScripts('start', []);			
+		callOnLuas('onCreate', []); //psych	-- I forgot that making this a callOnScripts calls onCreate twice on hscripts mb
 
 		if ((isStoryMode || showCutscene))
 		{
@@ -1327,14 +1326,14 @@ class PlayState extends MusicBeatState
 			if (SONG.notes[curSection].changeBPM)
 			{
 				Conductor.changeBPM(SONG.notes[curSection].bpm);
-				setOnLuas('curBpm', Conductor.bpm);
-				setOnLuas('crochet', Conductor.crochet);
-				setOnLuas('stepCrochet', Conductor.stepCrochet);
+				setOnScripts('curBpm', Conductor.bpm);
+				setOnScripts('crochet', Conductor.crochet);
+				setOnScripts('stepCrochet', Conductor.stepCrochet);
 			}
 
-			setOnLuas("mustHitSection", SONG.notes[curSection].mustHitSection);
+			setOnScripts("mustHitSection", SONG.notes[curSection].mustHitSection);
 			//setOnLuas('altAnim', SONG.notes[curSection].altAnim);
-			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
+			setOnScripts('gfSection', SONG.notes[curSection].gfSection);
 		}
 		
 		setOnScripts('curSection', curSection);
@@ -2443,21 +2442,21 @@ class PlayState extends MusicBeatState
 			generateStaticArrows(1, boyfriend.noteSkin, !skipArrowStartTween, daStartAlpha);	
 
 			for (i in 0...playerStrums.length) {
-				setOnLuas('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-				setOnLuas('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
 			}
 			for (i in 0...opponentStrums.length) {
-				setOnLuas('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-				setOnLuas('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
 			}
 
 			//kade engine
-			for (i in 0...strumLineNotes.length){
+			for (i in 0...strumLineNotes.length){//I wonder if someone still uses this...
 				var member = PlayState.instance.strumLineNotes.members[i];
-				setOnLuas("defaultStrum" + i + "X", Math.floor(member.x));
-				setOnLuas("defaultStrum" + i + "Y", Math.floor(member.y));
-				setOnLuas("defaultStrum" + i + "Angle", Math.floor(member.angle));
-				setOnLuas("defaultStrum" + i + "Alpha", Math.floor(member.alpha));
+				setOnScripts("defaultStrum" + i + "X", Math.floor(member.x));
+				setOnScripts("defaultStrum" + i + "Y", Math.floor(member.y));
+				setOnScripts("defaultStrum" + i + "Angle", Math.floor(member.angle));
+				setOnScripts("defaultStrum" + i + "Alpha", Math.floor(member.alpha));
 			}
 		
 			callOnScripts('onStartCountdown', null, true);
@@ -3302,10 +3301,10 @@ class PlayState extends MusicBeatState
 		#if desktop
 		if (songStarted)
 		{
-			setOnLuas('songPos',Conductor.songPosition);
-			setOnLuas('hudZoom', camHUD.zoom);
-			setOnLuas('cameraZoom',FlxG.camera.zoom);
-			callOnLuas('update', [elapsed]);
+			setOnScripts('songPos',Conductor.songPosition);
+			setOnScripts('hudZoom', camHUD.zoom);
+			setOnScripts('cameraZoom',FlxG.camera.zoom);
+			callOnScripts('update', [elapsed]);
 
 			if (luaWiggles != [])
 			{
@@ -4518,11 +4517,13 @@ class PlayState extends MusicBeatState
 	public var ratingName:String = '?';
 	public var ratingPercent:Float;
 	public var ratingFC:String;
-
-	function updateAccuracy(?badHit:Bool = false) {
-		setOnLuas('score', songScore);
-		setOnLuas('misses', songMisses);
-		setOnLuas('hits', songHits);
+	
+	function updateAccuracy(?badHit:Bool = false) 
+	{
+		setOnScripts('score', songScore);
+		setOnScripts('misses', songMisses);
+		setOnScripts('hits', songHits);
+		setOnScripts('combo', combo);
 
 		var ret:Dynamic = callOnScripts('onRecalculateRating', null, true);
 
@@ -4550,9 +4551,10 @@ class PlayState extends MusicBeatState
 		accuracyDefault = Math.max(0, totalNotesHitDefault / totalPlayed * 100);
 
 		callOnScripts('onUpdateScore', [badHit]);
-		setOnLuas('rating', ratingPercent);
-		setOnLuas('ratingName', ratingName);
-		setOnLuas('ratingFC', ratingFC);
+		
+		setOnScripts('rating', ratingPercent);
+		setOnScripts('ratingName', ratingName);
+		setOnScripts('ratingFC', ratingFC);
 	}
 			
 	function getKeyPresses(note:Note):Int
@@ -5225,7 +5227,7 @@ class PlayState extends MusicBeatState
 		playbackRate = value;
 		FlxG.animationTimeScale = value;
 		//Conductor.safeZoneOffset = (FlxG.save.data.safeFrames / 60) * 1000 * value;
-		setOnLuas('playbackRate', playbackRate);
+		setOnScripts('playbackRate', playbackRate);
 		adjustCamFollow();
 
 		return value;
@@ -5370,7 +5372,7 @@ class PlayState extends MusicBeatState
 			notes.sort(FlxSort.byY, (FlxG.save.data.downscroll ? FlxSort.ASCENDING : FlxSort.DESCENDING));
 		}
 
-		setOnLuas('curBeat',curBeat);
+		setOnScripts('curBeat',curBeat);
 		callOnScripts('beatHit', [curBeat]);
 		callOnScripts('onBeatHit', [curBeat]);
 
