@@ -316,8 +316,8 @@ class PreloadState extends FlxState
             if(CoolUtil.exists(Paths.inst(x))){
                 FlxG.sound.cache(Paths.inst(x));
             }
-            else if(CoolUtil.exists(Paths.music(x))){
-                FlxG.sound.cache(Paths.music(x));
+            else if(CoolUtil.exists(Paths.musicOld(x))){
+                FlxG.sound.cache(Paths.musicOld(x));
             }
             currentLoaded++;
         }

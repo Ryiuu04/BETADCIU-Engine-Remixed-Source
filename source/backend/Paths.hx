@@ -233,6 +233,11 @@ class Paths
 		return file;
 	}
 
+	inline static public function musicOld(key:String, ?library:String)//old music function because apparently the preload state doesn't work with the new one
+	{
+		return getPath('music/$key.$SOUND_EXT', MUSIC, library);
+	}
+
 	inline static public function video(key:String, ?library:String)
 	{
 		if(FileSystem.exists(Paths.modFolders('videos/' + key +'.mp4')))
