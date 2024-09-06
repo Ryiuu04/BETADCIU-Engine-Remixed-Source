@@ -173,9 +173,6 @@ class PlayState extends MusicBeatState
 	var camMovement:Float = 0.09;
 	public var shakeCam:Bool = false;
 
-	public static var songPosBG:FlxSprite;
-	public static var songPosBar:FlxBar;
-
 	var evilTrail:FlxTrail;
 	var usedTimeTravel:Bool = false;
 	var trailShit:Bool = false;
@@ -270,7 +267,6 @@ class PlayState extends MusicBeatState
 
 	var healthBarBG:FlxSprite;
 	public var healthBar:FlxBar; //pls don't die
-	private var songPositionBar:Float = 0;
 
 	//we do a bit of trollin
 	public var timeBarBG:FlxSprite;
@@ -481,9 +477,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.mouse.visible = false;
 		
-		/*if (FlxG.save.data.fpsCap > 240)
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(240);*/
-		
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
@@ -536,7 +529,7 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "Paused - " + detailsText;
 
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRankPsych(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
 		#end
 
 		// var gameCam:FlxCamera = FlxG.camera;
@@ -814,56 +807,50 @@ class PlayState extends MusicBeatState
 		strumLine = new FlxSprite(0, 50).makeGraphic(FlxG.width, 10);
 		strumLine.scrollFactor.set();
 		
-		if (FlxG.save.data.downscroll)
-			strumLine.y = FlxG.height - 165;
+		if (FlxG.save.data.downscroll) strumLine.y = FlxG.height - 165;
+		
+		timeTxt = new FlxText(50 + (FlxG.width / 2) - 248, 19, 400, "", 32);
+		timeTxt.screenCenter(X);
+		timeTxt.setFormat(Paths.font("phantomMuff.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timeTxt.scrollFactor.set();
+		timeTxt.alpha = 0;
+		timeTxt.borderSize = 2;
+		if(FlxG.save.data.downscroll) timeTxt.y = FlxG.height - 44;
 
-		if (ClientPrefs.data.psychUI)
-		{
-			timeTxt = new FlxText(50 + (FlxG.width / 2) - 248, 19, 400, "", 20);
-			timeTxt.screenCenter(X);
-			timeTxt.setFormat(Paths.font("phantomMuff.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			timeTxt.scrollFactor.set();
-			timeTxt.alpha = 0;
-			timeTxt.borderSize = 2;
-			timeTxt.antialiasing = true;
-			if(FlxG.save.data.downscroll) timeTxt.y = FlxG.height - 44;
-	
-			if(ClientPrefs.data.timeBarType == 'Song Name'){
-				timeTxt.text = SONG.song;
-				timeTxt.size = 16;
-			}else if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
-				timeTxt.text = SONG.song + "(0:00)";
-				timeTxt.size = 16;
-			}
-
-			updateTime = true;
-	
-			timeBarBG = new FlxSprite(0, 0).loadGraphic(Paths.image('healthBar'));
-			timeBarBG.scale.x = 400/600;
-			timeBarBG.updateHitbox();
-			timeBarBG.screenCenter(X);
-			timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
-			timeBarBG.scrollFactor.set();
-			timeBarBG.alpha = 0;
-			timeBarBG.color = FlxColor.BLACK;
-			add(timeBarBG);
-	
-			timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
-				'songPercent', 0, 1);
-			timeBar.scrollFactor.set();
-			timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-			timeBar.numDivisions = 200; //How much lag this causes?? Should i tone it down to idk, 400 or 200? I made it 200.
-			timeBar.alpha = 0;
-			add(timeBar);
-			add(timeTxt);
-
-			//quick patch
-				timeTxt.y += 4;
-				if(ClientPrefs.data.timeBarType == 'Song Name' || ClientPrefs.data.timeBarType == 'Song Name And Time'){// i love my life.
-					timeTxt.y += 1;
-				};
-			//
+		if(ClientPrefs.data.timeBarType == 'Song Name'){
+			timeTxt.text = SONG.song;
+			timeTxt.size = 16;
+		}else if(ClientPrefs.data.timeBarType == 'Song Name And Time'){
+			timeTxt.text = SONG.song + "(0:00)";
+			timeTxt.size = 16;
 		}
+
+		updateTime = true;
+	
+		timeBarBG = new FlxSprite(0, 0).loadGraphic(Paths.image('healthBar'));
+		timeBarBG.scale.x = 400/600;
+		timeBarBG.updateHitbox();
+		timeBarBG.screenCenter(X);
+		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
+		timeBarBG.scrollFactor.set();
+		timeBarBG.alpha = 0;
+		timeBarBG.color = FlxColor.BLACK;
+		add(timeBarBG);
+	
+		timeBar = new FlxBar(timeBarBG.x + 4, timeBarBG.y + 4, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 8), Std.int(timeBarBG.height - 8), this,
+			'songPercent', 0, 1);
+		timeBar.scrollFactor.set();
+		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+		timeBar.numDivisions = 200; //How much lag this causes?? Should i tone it down to idk, 400 or 200? I made it 200.
+		timeBar.alpha = 0;
+		add(timeBar);
+		add(timeTxt);
+
+		//quick patch
+		if(ClientPrefs.data.timeBarType == 'Song Name' || ClientPrefs.data.timeBarType == 'Song Name And Time'){// i love my life.
+			timeTxt.y += 3;
+		};
+		//		
 		
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
@@ -900,32 +887,7 @@ class PlayState extends MusicBeatState
 		
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		
-		FlxG.fixedTimestep = false;
 		moveCameraSection();
-
-		if (ClientPrefs.data.songPosition && !ClientPrefs.data.psychUI) // I dont wanna talk about this code :(
-		{
-			songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('healthBar'));
-			if (FlxG.save.data.downscroll)
-				songPosBG.y = FlxG.height * 0.9 + 45; 
-			songPosBG.screenCenter(X);
-			songPosBG.scrollFactor.set();
-			add(songPosBG);
-			
-			songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
-				'songPositionBar', 0, 90000);
-			songPosBar.scrollFactor.set();
-			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
-			add(songPosBar);
-
-			songNameTxt = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20,songPosBG.y,0,SONG.song, 16);
-			if (FlxG.save.data.downscroll)
-				songNameTxt.y -= 3;
-			songNameTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-			songNameTxt.scrollFactor.set();
-			add(songNameTxt);
-			songNameTxt.cameras = [camHUD];
-		}
 
 		switch (songLowercase)
 		{
@@ -966,23 +928,11 @@ class PlayState extends MusicBeatState
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
 
-		if (ClientPrefs.data.psychUI)
-		{
-			scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 19);
-			scoreTxt.setFormat(Paths.font("phantomMuff.ttf"), 19, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			scoreTxt.scrollFactor.set();
-			scoreTxt.borderSize = 1.25;
-			scoreTxt.antialiasing = true;
-			add(scoreTxt);
-		}
-		else
-		{
-			scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
-			if (!FlxG.save.data.accuracyDisplay)
-				scoreTxt.x = healthBarBG.x + healthBarBG.width / 2;
-
-			scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-		}
+		scoreTxt = new FlxText(0, healthBarBG.y + 36, FlxG.width, "", 20);
+		scoreTxt.setFormat(Paths.font("phantomMuff.ttf"), 19, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt.scrollFactor.set();
+		scoreTxt.borderSize = 1.25;
+		add(scoreTxt);
 		
 		scoreTxt.scrollFactor.set();													  
 		add(scoreTxt);
@@ -995,14 +945,8 @@ class PlayState extends MusicBeatState
 		//we gotta leave these out
 		playerHoldCovers.cameras = opponentHoldCovers.cameras = grpNoteSplashes.cameras = notes.cameras = [camHUD];
 
-		var objects:Array<String> = ['healthBar', 'healthBarBG', 'iconP1', 'iconP2', 'scoreTxt'];
+		var objects:Array<String> = ['healthBar', 'healthBarBG', 'iconP1', 'iconP2', 'scoreTxt', 'timeBar', 'timeBarBG', 'timeTxt'];
 		
-		if (ClientPrefs.data.psychUI)
-			objects = objects.concat(['timeBar', 'timeBarBG', 'timeTxt']);
-
-		if (ClientPrefs.data.songPosition && !ClientPrefs.data.psychUI)
-			objects = objects.concat(['songPosBG', 'songPosBar']);
-
 		if (hasDialogue)
 			objects = objects.concat(['doof']);
 
@@ -1155,6 +1099,9 @@ class PlayState extends MusicBeatState
 		}
 		else
 			regularIntro(songLowercase);	
+
+		if (substates.PauseSubState.songName != null) Paths.music(substates.PauseSubState.songName);
+		else if(Paths.formatToSongPath(ClientPrefs.data.pauseMusic) != 'none') Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic));
 
 		updateAccuracy();
 		callOnScripts('onCreatePost');
@@ -1622,7 +1569,6 @@ class PlayState extends MusicBeatState
 		setOnHScript(variable, arg, exclusions);
 	}
 
-
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if LUA_ALLOWED
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
@@ -1709,7 +1655,7 @@ class PlayState extends MusicBeatState
 				setCameraOffsets(); // never noticed these weren't set again because i rarely use stage camera offsets
 
 			case 'Add Camera Zoom':
-				if(FlxG.save.data.camzoom && FlxG.camera.zoom < 1.35) {
+				if(ClientPrefs.data.camZooms && FlxG.camera.zoom < 1.35) {
 					var camZoom:Float = Std.parseFloat(value1);
 					var hudZoom:Float = Std.parseFloat(value2);
 					if(Math.isNaN(camZoom)) camZoom = 0.015;
@@ -1858,8 +1804,7 @@ class PlayState extends MusicBeatState
 				}
 
 		}
-		callOnLuas('onEvent', [eventName, value1, value2, value3]);
-		callOnHScript('onEvent', [eventName, value1, value2, value3]);//thx Shunior for reminding me of this
+		callOnScripts('onEvent', [eventName, value1, value2, value3]);
 	}
 
 	public function getControl(key:String) {
@@ -2704,19 +2649,15 @@ class PlayState extends MusicBeatState
 		vocals.play();
 		opponentVocals.play();
 
-		if (ClientPrefs.data.psychUI)
-		{
-			if (startOnTime <= 0){
-				FlxTween.tween(timeBar, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
-				FlxTween.tween(timeTxt, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
-				FlxTween.tween(timeBarBG, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
-			}else{
-				timeBar.alpha = 1;
-				timeTxt.alpha = 1;
-				timeBarBG.alpha = 1;
-			}	
+		if (startOnTime <= 0){
+			FlxTween.tween(timeBar, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+			FlxTween.tween(timeTxt, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+			FlxTween.tween(timeBarBG, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+		}else{
+			timeBar.alpha = 1;
+			timeTxt.alpha = 1;
+			timeBarBG.alpha = 1;
 		}
-
 			
 		if(startOnTime > 0){
 			setSongTime(startOnTime - 500);
@@ -2733,35 +2674,7 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-	
-		if (ClientPrefs.data.songPosition && !ClientPrefs.data.psychUI)
-		{
-			songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('healthBar'));
-			songPosBG.screenCenter(X);
-			songPosBG.scrollFactor.set();
-			add(songPosBG);
-
-			if (FlxG.save.data.downscroll) {
-				songPosBG.y = FlxG.height * 0.9 + 45; 
-			}
-
-			songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
-				'songPositionBar', 0, songLength - 1000);
-			songPosBar.numDivisions = 1000;
-			songPosBar.scrollFactor.set();
-			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
-			add(songPosBar);
-
-			var songNameTxt = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20,songPosBG.y,0,SONG.song, 16);
-			songNameTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-			songNameTxt.scrollFactor.set();
-			add(songNameTxt);
-
-			if (FlxG.save.data.downscroll){
-				songNameTxt.y -= 3;
-			}
-		}
-		
+			
 		// Song check real quick
 		switch(curSong)
 		{
@@ -3338,6 +3251,10 @@ class PlayState extends MusicBeatState
 		health = (healthSet ? 1 : (health > maxHealth ? maxHealth : health));
 		healthLerp = FlxMath.lerp(healthLerp, health, 0.15/(ClientPrefs.data.framerate / 60));
 
+		if(inRange(healthLerp, 2, 0.001)){
+			healthLerp = 2;
+		}
+
 		var iconScaleShit:Array<Array<Dynamic>> = [[iconP1, playerIconScale], [iconP2, opponentIconScale]];
 
 		if (canIconBop)
@@ -3386,7 +3303,6 @@ class PlayState extends MusicBeatState
 			{
 				FlxG.sound.music._channel.
 			}*/
-			songPositionBar = Conductor.songPosition;
 
 			if (!paused)
 			{
@@ -3452,7 +3368,7 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("stepShit", curStep);
 		FlxG.watch.addQuick("songPos", Conductor.songPosition);
 
-		if (health <= 0 || FlxG.keys.justPressed.R && !inCutscene)
+		if (health <= 0 || FlxG.keys.justPressed.R && !inCutscene && !ClientPrefs.data.noReset)
 			death();
 
 		if (unspawnNotes[0] != null)
@@ -3779,12 +3695,9 @@ class PlayState extends MusicBeatState
 		updateTime = false;
 		endingSong = true;
 
-		if (ClientPrefs.data.psychUI)
-		{
-			timeBarBG.visible = false;
-			timeBar.visible = false;
-			timeTxt.visible = false;
-		}
+		timeBarBG.visible = false;
+		timeBar.visible = false;
+		timeTxt.visible = false;
 
 		switch (curSong.toLowerCase())
 		{
@@ -3816,9 +3729,6 @@ class PlayState extends MusicBeatState
 
 		trace('ending song');
 		deathCounter = 0;
-
-		/*if (FlxG.save.data.fpsCap > 240)
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(240);*/
 
 		canPause = false;
 		isPixel = false;
@@ -3981,7 +3891,7 @@ class PlayState extends MusicBeatState
 		var score:Float = 350;
 
 		if (FlxG.save.data.accuracyMod == 1){
-			var wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale / playbackRate);
+			var wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 			totalNotesHit += wife;
 		}
 		
@@ -4528,22 +4438,19 @@ class PlayState extends MusicBeatState
 		var ret:Dynamic = callOnScripts('onRecalculateRating', null, true);
 
 		if(ret != ModchartState.Function_Stop){
-			if(totalNotesHit > 0 && songMisses < 1 && goods < 1 && bads < 1 && shits < 1){//this shit fixes the problem? no. this thing make it show 100% percent? yes. so i don't care
+			if(totalNotesHit > 0 && songMisses < 1 && goods < 1 && bads < 1 && shits < 1 && FlxG.save.data.accuracyMod == 1){//temporary "fix" for the non 100% accuracy
 				ratingPercent = 1;
 			}else{
 				ratingPercent = HelperFunctions.truncateFloat(accuracy, 2) / 100;
 			}
 			ratingName = Ratings.generateRatingName(accuracy);
-			ratingFC = Ratings.GenerateLetterRankPsych(accuracy);
+			ratingFC = Ratings.GenerateLetterRank(accuracy);
 		}
-		
-		if (ClientPrefs.data.psychUI){
-			scoreTxt.text = '( Score: ' + numberWithCommas(songScore) + ' • Accuracy: ' + ratingPercent * 100 + '% • Combo Breaks: ' + songMisses + ' • Rank: ' + ratingFC + ' )';//peeps wanted no integer rating
-		}else
-			scoreTxt.text = Ratings.CalculateRanking(songScore,songScoreDef,nps,maxNPS,accuracy);
+
+		scoreTxt.text = 'Score: ' + songScore + ' | Misses: ' + songMisses + ' | Rating: ' + ratingName + ' (' + ratingPercent * 100 + '%)' + ' - ' + ratingFC;//peeps wanted no integer rating
 
 		totalPlayed += 1;
-		if(totalNotesHit > 0 && songMisses < 1 && goods < 1 && bads < 1 && shits < 1){//this shit fixes the problem? no. this thing make it show 100% percent? yes. so i don't care part 2
+		if(totalNotesHit > 0 && songMisses < 1 && goods < 1 && bads < 1 && shits < 1 && FlxG.save.data.accuracyMod == 1){//temporary "fix" for the non 100% accuracy part 2
 			accuracy = 100;
 		}else{
 			accuracy = Math.max(0,totalNotesHit / totalPlayed * 100);
@@ -5379,27 +5286,27 @@ class PlayState extends MusicBeatState
 		// FlxG.log.add('change bpm' + SONG.notes[curSection].changeBPM);
 		//wiggleShit.update(Conductor.crochet);
 
-		if (FlxG.save.data.camzoom)
+		if (ClientPrefs.data.camZooms)
 		{
 			if (camZooming && autoCamZoom && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0 && !inCutscene)
 			{
 				FlxG.camera.zoom += 0.015 * camZoomingMult;
 				camHUD.zoom += 0.03 * camZoomingMult;
 			}
-	
-			if (curBeat % iconBopSpeed == 0 && canIconBop)
+		}
+
+		if (curBeat % iconBopSpeed == 0 && canIconBop)
+		{
 			{
 				iconP1.scale.set(playerIconScale, playerIconScale);
 				iconP2.scale.set(opponentIconScale, opponentIconScale);
-	
+		
 				iconP1.updateHitbox();
 				iconP2.updateHitbox();
 			}
 		}
 
-		if (gf != null) {
-			danceIfPossible(gf);
-		}
+		if (gf != null) danceIfPossible(gf);
 		
 		danceIfPossible(boyfriend);
 		danceIfPossible(dad);
@@ -5694,4 +5601,7 @@ class PlayState extends MusicBeatState
 
         return Std.string(result);
     }
+	function inRange(a:Float, b:Float, tolerance:Float){
+		return (a <= b + tolerance && a >= b - tolerance);
+	}
 }
