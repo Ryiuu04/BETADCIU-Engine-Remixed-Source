@@ -809,7 +809,7 @@ class PlayState extends MusicBeatState
 		
 		if (FlxG.save.data.downscroll) strumLine.y = FlxG.height - 165;
 		
-		timeTxt = new FlxText(50 + (FlxG.width / 2) - 248, 19, 400, "", 32);
+		timeTxt = new FlxText(50 + (FlxG.width / 2) - 248, 19, 400, "", 20);
 		timeTxt.screenCenter(X);
 		timeTxt.setFormat(Paths.font("phantomMuff.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
@@ -847,8 +847,9 @@ class PlayState extends MusicBeatState
 		add(timeTxt);
 
 		//quick patch
+		timeTxt.y += 4;
 		if(ClientPrefs.data.timeBarType == 'Song Name' || ClientPrefs.data.timeBarType == 'Song Name And Time'){// i love my life.
-			timeTxt.y += 3;
+			timeTxt.y += 1;
 		};
 		//		
 		
@@ -932,6 +933,7 @@ class PlayState extends MusicBeatState
 		scoreTxt.setFormat(Paths.font("phantomMuff.ttf"), 19, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
+		scoreTxt.antialiasing = true;
 		add(scoreTxt);
 		
 		scoreTxt.scrollFactor.set();													  
@@ -4447,7 +4449,7 @@ class PlayState extends MusicBeatState
 			ratingFC = Ratings.GenerateLetterRank(accuracy);
 		}
 
-		scoreTxt.text = 'Score: ' + songScore + ' | Misses: ' + songMisses + ' | Rating: ' + ratingName + ' (' + ratingPercent * 100 + '%)' + ' - ' + ratingFC;//peeps wanted no integer rating
+		scoreTxt.text = '( Score: ' + numberWithCommas(songScore) + ' • Accuracy: ' + ratingPercent * 100 + '% • Combo Breaks: ' + songMisses + ' • Rank: ' + ratingFC + ' )';//peeps wanted no integer rating
 
 		totalPlayed += 1;
 		if(totalNotesHit > 0 && songMisses < 1 && goods < 1 && bads < 1 && shits < 1 && FlxG.save.data.accuracyMod == 1){//temporary "fix" for the non 100% accuracy part 2
