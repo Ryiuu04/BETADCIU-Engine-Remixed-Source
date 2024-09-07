@@ -1,6 +1,7 @@
 package objects;
 
 import flixel.graphics.frames.FlxAtlasFrames;
+import shaders.ColorSwap;
 
 import lime.utils.Assets;
 
@@ -11,6 +12,8 @@ class NoteSplash extends FlxSprite
 	public var idleAnim:String;
 	public var textureLoaded:String = null;
 	public var isPixel:Bool = false;
+	public var colorSwap:ColorSwap = null;
+	public var defScale:Float = 1;
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
@@ -27,6 +30,9 @@ class NoteSplash extends FlxSprite
 		if (skin == 'normal' || skin == 'default') skin = "";
 
 		loadAnims(skin);
+
+		colorSwap = new ColorSwap();
+		shader = colorSwap.shader;
 
 		setupNoteSplash(x, y, note);
 	}
@@ -61,9 +67,11 @@ class NoteSplash extends FlxSprite
 					case 2: this.y += 30;
 					case 3: this.x += 30;
 				}
+				defScale = 1.2;
 				alpha = 0.75;
 				scale.set(1.2 * (FlxG.save.data.poltatoPC ? 2 : 1) , 1.2 * (FlxG.save.data.poltatoPC ? 2 : 1));
 			case '-fever':
+				defScale = 1.08;
 				alpha = 0.6;
 				scale.set(1.08 * (FlxG.save.data.poltatoPC ? 2 : 1) , 1.08 * (FlxG.save.data.poltatoPC ? 2 : 1));
 				if(note == 0 || note == 3)
@@ -71,6 +79,7 @@ class NoteSplash extends FlxSprite
 				else
 					offset.set((0.33 * this.width) - 150, (0.315 * this.height) - 150);
 			default:
+				defScale = (isPixel ? PlayState.daPixelZoom : 1);
 				alpha = 0.6;
 				scale.set(1 * (FlxG.save.data.poltatoPC ? 2 : 1) * (isPixel ? PlayState.daPixelZoom : 1), 1 * (FlxG.save.data.poltatoPC ? 2 : 1) * (isPixel ? PlayState.daPixelZoom : 1));
 				(isPixel ? offset.set(-150, -150) : offset.set(0, 0));

@@ -22,6 +22,7 @@ class FreeplayState extends MusicBeatState
 	var curSelected:Int = 0;
 	var curDifficulty:Int = -1;
 
+	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
 	var comboText:FlxText;
 	var diffText:FlxText;
@@ -151,7 +152,7 @@ class FreeplayState extends MusicBeatState
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
+		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
 
@@ -261,6 +262,7 @@ class FreeplayState extends MusicBeatState
 
 		scoreText.text = "PERSONAL BEST:" + lerpScore;
 		comboText.text = combo + '\n';
+		positionHighscore();
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
@@ -271,8 +273,10 @@ class FreeplayState extends MusicBeatState
 
 		if (upP && canMove)
 			changeSelection(-shiftMult);
+			changeDiff();
 		if (downP && canMove)
 			changeSelection(shiftMult);
+			changeDiff();
 
 		if (controls.LEFT_P && canMove)
 			changeDiff(-1);
@@ -351,8 +355,13 @@ class FreeplayState extends MusicBeatState
 		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
 		#end
 
-		PlayState.storyDifficulty = curDifficulty;
-		diffText.text = '< ' + CoolUtil.difficultyString2() + ' >';
+		//PlayState.storyDifficulty = curDifficulty;
+		if (CoolUtil.difficulties.length > 1)
+			diffText.text = '< ' + lastDifficultyName.toUpperCase() + ' >';
+		else
+			diffText.text = lastDifficultyName.toUpperCase();
+
+		positionHighscore();
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
@@ -442,6 +451,16 @@ class FreeplayState extends MusicBeatState
 		{
 			curDifficulty = newPos;
 		}
+	}
+
+	private function positionHighscore() {
+		scoreText.x = FlxG.width - scoreText.width - 6;
+		scoreBG.scale.x = FlxG.width - scoreText.x + 6;
+		scoreBG.x = FlxG.width - (scoreBG.scale.x / 2);
+		diffText.x = Std.int(scoreBG.x + (scoreBG.width / 2));
+		diffText.x -= diffText.width / 2;
+		comboText.x = Std.int(scoreBG.x + (scoreBG.width / 2));
+		comboText.x -= diffText.width / 2 - 150;
 	}
 
 	public static function destroyFreeplayVocals() {

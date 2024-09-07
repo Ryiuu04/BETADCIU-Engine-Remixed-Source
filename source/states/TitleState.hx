@@ -59,7 +59,7 @@ class TitleState extends MusicBeatState
 		{
 			trace("Loaded " + openfl.Assets.getLibrary("default").assetsLoaded + " assets (DEFAULT)");
 		}
-		
+				
 		backend.PlayerSettings.init();
 
 		#if windows
@@ -161,11 +161,12 @@ class TitleState extends MusicBeatState
 		titlestatebg.screenCenter(X);
 		add(titlestatebg);
 
-		logoBl = new FlxSprite(-150, 1500);
+		logoBl = new FlxSprite(0, 1700);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
 		logoBl.antialiasing = true;
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
 		logoBl.animation.play('bump');
+		logoBl.scale.set(0.8, 0.8);
 		logoBl.updateHitbox();
 		// logoBl.screenCenter();
 		// logoBl.color = FlxColor.BLACK;
@@ -435,7 +436,7 @@ class TitleState extends MusicBeatState
 			FlxG.camera.flash(FlxColor.WHITE, 4);
 			remove(credGroup);
 
-			FlxTween.tween(logoBl,{y: -100}, 1.4, {ease: FlxEase.expoInOut});
+			FlxTween.tween(logoBl,{y: 0}, 1.4, {ease: FlxEase.expoInOut});
 
 			logoBl.angle = -4;
 

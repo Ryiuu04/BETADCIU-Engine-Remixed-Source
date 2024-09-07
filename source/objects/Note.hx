@@ -59,6 +59,7 @@ class Note extends FlxSprite
 	public var noteScore:Float = 1;
 
 	public var luaID:Int = 0;
+	public var colorSwap:ColorSwap;
 
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
@@ -159,7 +160,6 @@ class Note extends FlxSprite
 	}
 
 	private function set_noteType(value:String):String {
-
 		if(noteData > -1 && noteType != value) {
 			switch(value) {
 				case "Hurt Note":
@@ -217,6 +217,8 @@ class Note extends FlxSprite
 		noteData = _noteData % Main.keyAmmo[mania];
 
 		texture = style;
+		colorSwap = new ColorSwap();
+		shader = colorSwap.shader;
 
 		var frameN:Array<String> = ["purple", "blue", "green", "red"];
 		switch (mania)
@@ -384,6 +386,7 @@ class Note extends FlxSprite
 	function loadNoteAnims(daStyle:String, ?sustainNote:Bool = false) 
 	{
 		var initialStyle:String = daStyle;
+		separateSheets = false;
 
 		switch (daStyle)
 		{

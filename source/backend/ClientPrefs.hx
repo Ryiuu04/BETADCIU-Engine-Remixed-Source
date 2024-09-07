@@ -76,6 +76,7 @@ import states.TitleState;
 	public var controllerMode:Bool = false;
 	public var psychUI:Bool = true;//i was planning on removing this, but removing this will break A LOT of Blantados scripts, so i'll make it enabled by default
 	public var noteSplashes:Bool = true;
+	public var holdCovers:Bool = true;
 	public var fpsRain:Bool = false;
 	public var cursing:Bool = true;
 	public var violence:Bool = true;
@@ -161,6 +162,13 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.fpsCap == null && FlxG.save.data.framerate == null) {
+			var framerate = 120;
+			FlxG.save.data.framerate = framerate;
+			FlxG.save.data.fpsCap = framerate;
+			FlxG.save.flush();
+		}
+
 		// values I couldn't add to the array since they have different save data names and var names
 		if(FlxG.save.data.fps != null) {
 			data.showFPS = FlxG.save.data.fps;
@@ -170,6 +178,10 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.noteSplash != null) {
 			data.noteSplashes = FlxG.save.data.noteSplash;
+		}
+
+		if(FlxG.save.data.fpsCap == null) {
+			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(120);//oopsie.
 		}
 		
 		if(FlxG.save.data.fpsCap != null) {
@@ -206,10 +218,11 @@ class ClientPrefs {
 
 		if(FlxG.save.data.volume != null){
 			FlxG.sound.volume = FlxG.save.data.volume;
-		}
+		}else FlxG.sound.volume = 1;
+
 		if (FlxG.save.data.mute != null){
 			FlxG.sound.muted = FlxG.save.data.mute;
-		}
+		}else FlxG.sound.muted = false;
 		
 		for (key in Reflect.fields(data)){
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))

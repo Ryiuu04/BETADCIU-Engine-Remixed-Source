@@ -45,6 +45,7 @@ class BonusSongsState extends MusicBeatState
 	var bg:FlxSprite;
 
 	var inUnlockMenu:Bool;
+	public static var inMain:Bool = true;
 	public static var canMove:Bool;
 	public var warning:Bool = false;
 	private static var lastDifficultyName:String = '';
@@ -80,14 +81,14 @@ class BonusSongsState extends MusicBeatState
 				{
 					colors = [146, 113, 253];
 				}
-				addSong(song[0], i, song[1]);
+				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
 			}
 		}
 		WeekData.setDirectoryFromWeek();
 
 		if (songs.length < 1)
 		{
-			addSong('Placeholder', 0, 'face');
+			addSong('Placeholder', 0, 'face', 0xFFFFFFFF);
 			warning = true;
 			trace('warn em bro!');
 		}
@@ -110,6 +111,7 @@ class BonusSongsState extends MusicBeatState
 			}
 	
 		inUnlockMenu = false;
+		inMain = true;
 		canMove = true;
 			
 		//FlxG.sound.cache(PlayState.existsInCTS("unlock"));
@@ -130,10 +132,8 @@ class BonusSongsState extends MusicBeatState
 		// LOAD CHARACTERS
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.color = FlxColor.fromRGB(112,167,240);
 		add(bg);
-		intendedColor = bg.color;
-		
+
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
 
@@ -219,6 +219,10 @@ class BonusSongsState extends MusicBeatState
 		otherText.visible = false;
 		add(otherText);
 
+		if(curSelected >= songs.length) curSelected = 0;
+		bg.color = songs[curSelected].color;
+		intendedColor = bg.color;
+
 		if(lastDifficultyName == '')
 		{
 			lastDifficultyName = CoolUtil.defaultDifficulty;
@@ -250,6 +254,7 @@ class BonusSongsState extends MusicBeatState
 			add(blackScreen);
 
 			blackScreen.visible = true;
+			inMain = false;
 			canMove = false;
 
 			var daText = new FlxText(0, 0, 0, "No Bonus Songs Detected! \n Press enter to return to main menu.", 48);
@@ -269,9 +274,9 @@ class BonusSongsState extends MusicBeatState
 		super.create();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String)
+	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
 	{
-		songs.push(new FreeplayState.SongMetadata(songName, weekNum, songCharacter));
+		songs.push(new FreeplayState.SongMetadata(songName, weekNum, songCharacter, color));
 	}
 
 	public function changeBGColor():Void{
@@ -287,9 +292,9 @@ class BonusSongsState extends MusicBeatState
 				}
 			});
 		}
-	}	
+}	
 
-	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
+	/*public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
 	{
 		if (songCharacters == null)
 			songCharacters = ['bf'];
@@ -302,7 +307,7 @@ class BonusSongsState extends MusicBeatState
 			if (songCharacters.length != 1)
 				num++;
 		}
-	}
+	}*/
 
 	override function update(elapsed:Float)
 	{
@@ -346,20 +351,30 @@ class BonusSongsState extends MusicBeatState
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
 		
-		if (upP && canMove)
+		if (upP && inMain && canMove)
 			changeSelection(-shiftMult);
-		if (downP && canMove)
+		if (downP && inMain && canMove)
 			changeSelection(shiftMult);
 
-		if (controls.LEFT_P && canMove)
+		if (controls.LEFT_P && inMain && canMove)
 			changeDiff(-1);
-		if (controls.RIGHT_P && canMove)
+		if (controls.RIGHT_P && inMain && canMove)
 			changeDiff(1);
 
-		if (controls.BACK && canMove)
-			MusicBeatState.switchState(new MainMenuState());
+		if (controls.BACK && inMain && canMove)
+		{
+			persistentUpdate = false;
 
-		if (accepted && canMove)
+			if(colorTween != null) {
+				colorTween.cancel();
+			}
+			
+			//unloadAssets();
+			FlxG.sound.play(PlayState.existsInCTS('cancelMenu'));
+			MusicBeatState.switchState(new MainMenuState());
+		}
+
+		if (accepted && inMain && canMove)
 		{
 			persistentUpdate = false;
 			
@@ -390,6 +405,10 @@ class BonusSongsState extends MusicBeatState
 
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
+			if(colorTween != null) {
+				colorTween.cancel();
+			}
+
 			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
