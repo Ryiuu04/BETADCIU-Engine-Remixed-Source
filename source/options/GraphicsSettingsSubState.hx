@@ -67,7 +67,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		option.minValue = 60;
-		option.maxValue = 240;
+		option.maxValue = 360;//thank me later 360hz peeps
 		option.defaultValue = 120;
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;

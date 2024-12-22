@@ -11,12 +11,14 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxStringUtil;
 
+import options.OptionsState;
+
 class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Restart with Cutscene', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Restart with Cutscene', 'Options', 'Exit to menu'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -208,6 +210,17 @@ class PauseSubState extends MusicBeatSubstate
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
+				case 'Options':
+					PlayState.instance.paused = true; // For lua
+					PlayState.instance.vocals.volume = 0;
+					MusicBeatState.switchState(new OptionsState());
+					if(ClientPrefs.data.pauseMusic != 'None')
+					{
+						FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), pauseMusic.volume);
+						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+						FlxG.sound.music.time = pauseMusic.time;
+					}
+					OptionsState.onPlayState = true;
 				case 'Skip Time':
 					if(curTime < Conductor.songPosition)
 					{
@@ -249,21 +262,25 @@ class PauseSubState extends MusicBeatSubstate
 					
 					if (PlayState.isStoryMode){
 						MusicBeatState.switchState(new states.StoryMenuState());
+						//openSubState(new substates.StickerSubState(null, (sticker) -> new states.StoryMenuState(sticker)));
 					}
 					else if (PlayState.isBETADCIU) {
 						if (CoolUtil.difficulties[0] == "Guest") {
 							MusicBeatState.switchState(new states.GuestBETADCIUState());
 						} else {
-							MusicBeatState.switchState(new states.BETADCIUState());
+							//MusicBeatState.switchState(new states.BETADCIUState());
+							openSubState(new substates.StickerSubState(null, (sticker) -> new states.BETADCIUState(sticker)));
 						}
 					} else if (PlayState.isBonus) {
-						MusicBeatState.switchState(new states.BonusSongsState());
+						//MusicBeatState.switchState(new states.BonusSongsState());
+						openSubState(new substates.StickerSubState(null, (sticker) -> new states.BonusSongsState(sticker)));
 					} else if (PlayState.isNeonight) {
 						MusicBeatState.switchState(new states.NeonightState());
 					} else if (PlayState.isVitor) {
 						MusicBeatState.switchState(new states.VitorState());
 					} else {
-						MusicBeatState.switchState(new states.FreeplayState());
+						//MusicBeatState.switchState(new states.FreeplayState());
+						openSubState(new substates.StickerSubState(null, (sticker) -> new states.FreeplayState(sticker)));
 					}					
 			}
 		}
@@ -292,7 +309,7 @@ class PauseSubState extends MusicBeatSubstate
 		PlayState.instance.callOnLuas('onExitSong', []); // so that it also affects when restarting
 
 		if (!cutscene && useTransition)
-			LoadingState.loadAndSwitchState(new states.CustomLoading());
+			LoadingState.loadAndSwitchState(new states.CustomLoading(true));
 		else if (!cutscene && useTransition && !preloadAgain)
 			MusicBeatState.resetState();
 		else

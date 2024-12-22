@@ -82,6 +82,7 @@ class Note extends FlxSprite
 	public var eventVal2:String = '';
 	public var eventVal3:String = '';
 
+	public static var SUSTAIN_SIZE:Int = 44;
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var noteScale:Float;
 	public static var PURP_NOTE:Int = 0;
@@ -131,6 +132,7 @@ class Note extends FlxSprite
 	public var animSuffix:String = "";
 
 	public var originalHeightForCalcs:Float = 6;
+	public var correctionOffset:Float = 0; //dont mess with this
 
 	public var noteSection:Int = 0;
 

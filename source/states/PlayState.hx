@@ -815,6 +815,7 @@ class PlayState extends MusicBeatState
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
+		timeTxt.antialiasing = true;
 		if(FlxG.save.data.downscroll) timeTxt.y = FlxG.height - 44;
 
 		if(ClientPrefs.data.timeBarType == 'Song Name'){
@@ -1653,8 +1654,15 @@ class PlayState extends MusicBeatState
 				gfSpeed = value;
 
 			case 'Change Stage':
+				ratingSkinEventPre = null;//reseting the custom rating skin stuff.
+				ratingSkinEventSuf = null;//reseting the custom rating skin stuff.
+
 				ModchartState.changeStage(value1);
 				setCameraOffsets(); // never noticed these weren't set again because i rarely use stage camera offsets
+
+			case 'Change Rating Skin':
+				if(value1 != null) ratingSkinEventPre = value1;
+				if(value2 != null) ratingSkinEventSuf = value2;
 
 			case 'Add Camera Zoom':
 				if(ClientPrefs.data.camZooms && FlxG.camera.zoom < 1.35) {
@@ -3273,10 +3281,13 @@ class PlayState extends MusicBeatState
 	
 		var iconOffset:Int = 26;
 		var healthPercent:Float = FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01;
-		iconP1.x = FlxMath.lerp(iconP1.x, healthBar.x + (healthBar.width * healthPercent - iconOffset), 0.15/(ClientPrefs.data.framerate / 60));
-		iconP2.x = FlxMath.lerp(iconP2.x, healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset), 0.15/(ClientPrefs.data.framerate / 60));
-		//iconP1.x = healthBar.x + (healthBar.width * healthPercent - iconOffset);
-		//iconP2.x = healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset);
+		if (startingSong == false){//visual fix
+			iconP1.x = FlxMath.lerp(iconP1.x, healthBar.x + (healthBar.width * healthPercent - iconOffset), 0.15/(ClientPrefs.data.framerate / 60));
+			iconP2.x = FlxMath.lerp(iconP2.x, healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset), 0.15/(ClientPrefs.data.framerate / 60));
+		}else{
+			iconP1.x = healthBar.x + (healthBar.width * healthPercent - iconOffset);
+			iconP2.x = healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset);
+		}
 
 		var isHealthBarPercentLessThan20:Bool = healthBar.percent < 20;
 		var isHealthBarPercentGreaterThan80:Bool = healthBar.percent > 80;
@@ -3879,6 +3890,9 @@ class PlayState extends MusicBeatState
 	public var comboGroup:FlxSpriteGroup;
 	public var coolText:FlxText = new FlxText(0, 0, 0, "lol", 32);
 
+	private var ratingSkinEventPre:String = null;
+	private var ratingSkinEventSuf:String = null;
+
 	private function popUpScore(daNote:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
@@ -3967,6 +3981,9 @@ class PlayState extends MusicBeatState
 			pixelShitPart2 = '-pixel';	
 		}
 
+		if(ratingSkinEventPre != null) pixelShitPart1 = ratingSkinEventPre;
+		if(ratingSkinEventSuf != null) pixelShitPart2 = ratingSkinEventSuf;
+	
 		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
 			return;
 		}
@@ -5603,6 +5620,7 @@ class PlayState extends MusicBeatState
 
         return Std.string(result);
     }
+	
 	function inRange(a:Float, b:Float, tolerance:Float){
 		return (a <= b + tolerance && a >= b - tolerance);
 	}

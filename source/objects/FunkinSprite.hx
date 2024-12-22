@@ -26,4 +26,19 @@ class FunkinSprite extends FlxSprite{
 			return animOffsets[name];
 		return [0,0];
 	}
+
+    public static function isTextureCached(key:String):Bool
+    {
+        return FlxG.bitmap.get(key) != null;
+    }
+
+    public function loadTexture(key:String):FunkinSprite
+    {
+        var graphicKey:String = Paths.image(key);
+        if (!isTextureCached(graphicKey)) FlxG.log.warn('Texture not cached, may experience stuttering! $graphicKey');
+
+        loadGraphic(graphicKey);
+
+        return this;
+    }
 }

@@ -10,6 +10,8 @@ import objects.AttachedText;
 import options.Option;
 import backend.InputFormatter;
 
+import flixel.addons.display.FlxBackdrop;
+
 class BaseOptionsMenu extends MusicBeatSubstate
 {
 	private var curOption:Option = null;
@@ -43,6 +45,15 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
+
+		var titlestatebg:FlxBackdrop;
+		
+		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.5;
+		titlestatebg.screenCenter(X);
+		add(titlestatebg);
 
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();
@@ -103,12 +114,31 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
+
+		Conductor.changeBPM(110);
+		if (FlxG.sound.music == null) FlxG.sound.playMusic(Paths.music('newMenu'), 0);
 	}
 
 	public function addOption(option:Option) {
 		if(optionsArray == null || optionsArray.length < 1) optionsArray = [];
 		optionsArray.push(option);
 		return option;
+	}
+
+	static function sectionHitCustom() {  // section hit is not working idk why and im too lazy to fix it so i'll just implement this dumb ass function as a workaround
+		// trace('sectionHit!');
+		if(ClientPrefs.data.camZooms) FlxG.camera.zoom += 0.02;
+	}	
+
+	override function beatHit() {
+		// trace('beatHit!');
+		if (curBeat % 4 == 0) sectionHitCustom();
+
+		if (curBeat % 2 == 0 && ClientPrefs.data.camZooms) {
+			bg.scale.set(1.06, 1.06);
+			bg.updateHitbox();
+			bg.offset.set();
+		}
 	}
 
 	var nextAccept:Int = 5;
@@ -123,6 +153,17 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if (FlxG.sound.music != null) Conductor.songPosition = FlxG.sound.music.time;
+
+		FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * Conductor.bpm / 100), 0, 1));
+
+		if(ClientPrefs.data.camZooms) {
+			var mult:Float = FlxMath.lerp(1, bg.scale.x, Math.max(0, Math.min(1, 1 - (elapsed * 9))));
+			bg.scale.set(mult, mult);
+			bg.updateHitbox();
+			bg.offset.set();
+		}
 
 		if(bindingKey)
 		{

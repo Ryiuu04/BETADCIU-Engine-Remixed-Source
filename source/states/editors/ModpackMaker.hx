@@ -27,6 +27,7 @@ import lime.utils.Assets;
 import flixel.graphics.frames.FlxAtlasFrames;
 
 import luafiles.ModchartState;
+import luafiles.HScript;
 import luafiles.DebugLuaText;
 
 import objects.Character;

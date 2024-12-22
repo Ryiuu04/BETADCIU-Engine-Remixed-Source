@@ -86,20 +86,6 @@ class MusicBeatState extends FlxUIState
 					rollbackSection();
 			}
 		}
-
-		if (FlxG.save.data.fpsRain)
-		{
-			if (skippedFrames >= 6)
-			{
-				if (currentColor >= array.length)
-					currentColor = 0;
-				(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
-				currentColor++;
-				skippedFrames = 0;
-			}
-			else
-				skippedFrames++;
-		}
 		
 		super.update(elapsed);
 	}

@@ -40,7 +40,7 @@ class MainMenuState extends MusicBeatState
 	public static var kadeEngineVer:String = "BETADCIU Engine";
 	public static var gameVer:String = "0.2.8";
 	public static var betadciuVer:String = "1.8.1";
-	public static var remixedVer:String = "1.1";
+	public static var remixedVer:String = "1.2";
 
 	var bg:FlxSprite;
 	var magenta:FlxSprite;
@@ -142,7 +142,7 @@ class MainMenuState extends MusicBeatState
 			}
 		}
 
-		FlxG.camera.follow(camFollow, null, 0.06 * (120 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
+		FlxG.camera.follow(camFollow, null, 0.06 * (120 / ClientPrefs.data.framerate));
 
 		var versionShit:FlxText = new FlxText(FlxG.width * 0.750, FlxG.height - 48, 0,"Remixed: "+ remixedVer + "\n" + kadeEngineVer + " Version: " + betadciuVer + "\nFriday Night Funkin' Version: " + gameVer, 12);
 		versionShit.scrollFactor.set();

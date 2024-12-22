@@ -4,10 +4,13 @@ import flash.text.TextField;
 import flixel.addons.display.FlxGridOverlay;
 import lime.utils.Assets;
 import flixel.effects.FlxFlicker;
+import flixel.FlxObject;
 import states.editors.ChartingState;
 
 import backend.WeekData;
 import backend.Song;
+
+import substates.StickerSubState;
 
 #if windows
 import Sys;
@@ -27,6 +30,7 @@ class BonusSongsState extends MusicBeatState
 
 	var scoreText:FlxText;
 	var diffText:FlxText;
+	var scoreBG:FlxSprite;
 	var comboText:FlxText;
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
@@ -55,13 +59,35 @@ class BonusSongsState extends MusicBeatState
 	var intendedColor:Int;
 	var colorTween:FlxTween;
 
+	var textScale:FlxObject;//testing.
+	var stickerSubState:StickerSubState;
+	public function new(?stickers:StickerSubState = null)
+	{
+		super();
+
+		if (stickers != null)
+		{
+		stickerSubState = stickers;
+		}
+	}
+
 	override function create()
 	{
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		textScale = new FlxObject(1, 1, 0, 0);
+
+		//Paths.clearStoredMemory();
+		//Paths.clearUnusedMemory();
 		WeekData.reloadWeekFiles(false, 2);
 
-		persistentUpdate = true;
+		//persistentUpdate = true;
+
+		if (stickerSubState != null){
+			this.persistentUpdate = true;
+			this.persistentDraw = true;
+		
+			openSubState(stickerSubState);
+			stickerSubState.degenStickers();
+		}
 
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
@@ -167,7 +193,7 @@ class BonusSongsState extends MusicBeatState
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
+		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
 
@@ -313,6 +339,15 @@ class BonusSongsState extends MusicBeatState
 	{
 		super.update(elapsed);
 
+		grpSongs.forEach(function(e:Alphabet){
+			e.setScale(textScale.x, textScale.y);
+			e.screenCenter(X); 
+
+			for (i in 0...iconArray.length){
+				iconArray[i].scale.set(textScale.x, textScale.y);
+			}
+		});
+
 		if (FlxG.sound.music.volume < 0.7){
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
@@ -417,7 +452,7 @@ class BonusSongsState extends MusicBeatState
 
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
 			{
-				new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
+				new FlxTimer().start(llll/1000 - 0.3, function(tmr:FlxTimer)
 				{
 					if (FlxG.keys.pressed.ALT){
 						MusicBeatState.switchState(new ChartingState());
@@ -429,19 +464,31 @@ class BonusSongsState extends MusicBeatState
 
 			grpSongs.forEach(function(e:Alphabet){
 				if (e.text != songs[curSelected].songName){
-					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
-					
+					FlxTween.tween(e, {alpha: 0}, 0.2);
+
+					for (i in 0...iconArray.length){
+						if(iconArray[i] != iconArray[curSelected])
+						FlxTween.tween(iconArray[i], {alpha: 0}, 0.4);
+					}
+								
+				}else{
+					FlxFlicker.flicker(e);
+					trace(curSelected);
+
+					FlxTween.tween(textScale, {x: 1.2, y: 1.2}, llll/1000-0.3,{ease: FlxEase.cubeOut});
+					FlxG.sound.music.fadeOut(llll / 1000, 0);
+
+					for (i in [scoreBG, scoreText, diffText, comboText]) FlxTween.tween(i, {alpha: 0}, 0.2);
+
+					new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
+					{
 						if (FlxG.keys.pressed.ALT){
 							MusicBeatState.switchState(new ChartingState());
 						}else{
 							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
-					}});
-				}else{
-					FlxFlicker.flicker(e);
-					trace(curSelected);
-					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
-				}
+					});
+				}	
 			});
 		}
 	}

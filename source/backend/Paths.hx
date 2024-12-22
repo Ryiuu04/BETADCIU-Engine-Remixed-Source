@@ -511,7 +511,13 @@ class Paths
 	}
 
 	inline static public function formatToSongPath(path:String) {
-		return path.toLowerCase().replace(' ', '-');
+		//return path.toLowerCase().replace(' ', '-');
+
+		var invalidChars = ~/[~&\\;:<>#]/;
+		var hideChars = ~/[.,'"%?!]/;
+
+		var path = invalidChars.split(path.replace(' ', '-')).join("-");
+		return hideChars.split(path).join("").toLowerCase();
 	}
 
 	public static var globalMods:Array<String> = [];
@@ -678,7 +684,9 @@ class Paths
 	public static function addToExclusionsList(key:String) {
 		localTrackedAssets.push(key);
 		dumpExclusions.push(key);
-		trace("added: " + key + " to the exclusions list!");
+		#if debug
+			trace("added: " + key + " to the exclusions list!");
+		#end
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String

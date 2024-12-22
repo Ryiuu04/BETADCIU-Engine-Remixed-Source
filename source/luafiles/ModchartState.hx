@@ -1083,7 +1083,19 @@ class ModchartState
 				}
 				
 			});
-			
+
+			//paths stuff
+			Lua_helper.add_callback(lua, "paths", function(tag:String, text:String) {
+				switch(tag)
+				{
+					case 'font': return Paths.font(text);
+					case 'image': return Paths.image(text);
+					case 'xml': return Paths.xmlNew(text);
+					case 'sound': return Paths.sound(text);
+					default: return '';
+				}
+			});
+
 			Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
 				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
 					ModpackMaker.luaImageList.push(image);
@@ -1211,6 +1223,44 @@ class ModchartState
 				}
 			});
 
+			Lua_helper.add_callback(lua, "precacheVideo", function(name:String) {
+				if (ModpackMaker.inModpackMaker){
+					return;
+				}
+                #if VIDEOS_ALLOWED
+                var leVSprite:PsychVideoSprite = null;
+                if(FileSystem.exists(Paths.video(name)) && name != null && name.length > 0) {
+                    leVSprite = new PsychVideoSprite();
+                    leVSprite.load(Paths.video(name));
+                    leVSprite.destroy();
+                } else {
+                    luaTrace('precacheVideo: The video file "' + name + '" cannot be found!', FlxColor.RED);
+                    return;
+                }
+                #else
+                luaTrace('Nuh Uh!!... - Platform not supported!');
+                #end
+			});
+
+			Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
+				if (ModpackMaker.inModpackMaker){
+					return;
+				}
+                #if VIDEOS_ALLOWED // just a copy paste of the precacheVideo function
+                var leVSprite:PsychVideoSprite = null;
+                if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
+                    leVSprite = new PsychVideoSprite();
+                    leVSprite.load(Paths.video(videoFile));
+                    leVSprite.destroy();
+                } else {
+                    luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
+                    return;
+                }
+                #else
+                luaTrace('Nuh Uh!!... - Platform not supported!');
+                #end
+            });
+
 			Lua_helper.add_callback(lua, "getProperty", function(variable:String) {
 				return 0;
 			});
@@ -1322,6 +1372,12 @@ class ModchartState
 		}
 		else
 		{
+			for (name => func in customFunctions)
+			{
+				if(func != null)
+					Lua_helper.add_callback(lua, name, func);
+			}
+
 			Lua_helper.add_callback(lua,"doFunction", doFunction);
 			Lua_helper.add_callback(lua,"changeDadCharacter", changeDadCharacter);
 			Lua_helper.add_callback(lua,"changeBoyfriendCharacter", changeBoyfriendCharacter);
@@ -3198,6 +3254,23 @@ class ModchartState
 				Paths.returnGraphic(name);
 			});
 
+			Lua_helper.add_callback(lua, "precacheVideo", function(name:String) {
+				// I hate you FlxVideoSprite....
+                #if VIDEOS_ALLOWED
+                var leVSprite:PsychVideoSprite = null;
+                if(FileSystem.exists(Paths.video(name)) && name != null && name.length > 0) {
+                    leVSprite = new PsychVideoSprite();
+                    leVSprite.load(Paths.video(name));
+                    leVSprite.destroy();
+                } else {
+                    luaTrace('precacheVideo: The video file "' + name + '" cannot be found!', FlxColor.RED);
+                    return;
+                }
+                #else
+                luaTrace('Nuh Uh!!... - Platform not supported!');
+                #end
+			});
+
 			Lua_helper.add_callback(lua, "precacheFont", function(name:String) {
 				return name; // this doesn't actually preload the font.	
 			});
@@ -3499,6 +3572,22 @@ class ModchartState
 				var shit:Character = PlayState.instance.modchartCharacters.get(tag);
 				if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 				else luaTrace("changeLuaCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			});
+
+			Lua_helper.add_callback(lua, "flipCharacterAnim", function(character:String) {
+				switch(character.toLowerCase()) {
+					case 'dad':
+						PlayState.instance.dad.flipAnims();
+					case 'gf' | 'girlfriend':
+						PlayState.instance.gf.flipAnims();
+					default:
+						if(PlayState.instance.modchartCharacters.exists(character)) {
+							var spr:Character = PlayState.instance.modchartCharacters.get(character);
+							spr.flipAnims();
+							return;
+						}
+						PlayState.instance.boyfriend.flipAnims();
+				}
 			});
 	
 			Lua_helper.add_callback(lua, "makeLuaTrail", function(tag:String, character:String, color:String) {

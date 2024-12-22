@@ -59,7 +59,10 @@ import objects.BGSprite;
 
 import states.PlayState;
 import states.LoadingState;
+
 import luafiles.ModchartState;
+
+import substates.StickerSubState;
 
 using StringTools;
 

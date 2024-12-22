@@ -6,6 +6,7 @@ import flixel.addons.effects.chainable.FlxWaveEffect;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.animation.FlxBaseAnimation;
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 import flixel.math.FlxRandom;
 import flixel.FlxObject;
 import openfl.display.BlendMode;
@@ -122,6 +123,82 @@ class Stage extends MusicBeatState
 
 		switch (daStage)
 		{
+			case 'mainStageErect':
+			{
+				var antialiasing = ClientPrefs.data.antialiasing;
+
+				camZoom = 0.85;
+
+				pre = 'erect';
+				suf = 'week1';//shouldn't this be called "folder"?
+
+				var backDark = new FlxSprite(729, -170).loadGraphic(Paths.image(pre+'/backDark', suf));
+				backDark.scrollFactor.set(1, 1);
+				backDark.antialiasing = antialiasing;
+				swagBacks['backDark'] = backDark;
+				toAdd.push(backDark);
+
+				var brightLightSmall = new FlxSprite(967, -103).loadGraphic(Paths.image(pre+'/brightLightSmall', suf));
+				brightLightSmall.scrollFactor.set(1.2, 1.2);
+				brightLightSmall.antialiasing = antialiasing;
+				swagBacks['brightLightSmall'] = brightLightSmall;
+				toAdd.push(brightLightSmall);
+
+				var crowd = new FlxSprite(560, 290);
+				crowd.scrollFactor.set(0.8, 0.8);
+				crowd.frames = Paths.getSparrowAtlas('erect/crowd', 'week1');
+				crowd.animation.addByPrefix('idle', 'Symbol 2 instance ', 12, true);
+				crowd.animation.play('idle');
+				crowd.antialiasing = antialiasing;
+				swagBacks['crowd'] = crowd;
+				toAdd.push(crowd);
+
+				var bg = new FlxSprite(-603, -187).loadGraphic(Paths.image(pre+'/bg', suf));
+				bg.scrollFactor.set(1, 1);
+				bg.antialiasing = antialiasing;
+				swagBacks['bg'] = bg;
+				toAdd.push(bg);
+
+				var server = new FlxSprite(-361, 205).loadGraphic(Paths.image(pre+'/server', suf));
+				server.scrollFactor.set(1, 1);
+				server.antialiasing = antialiasing;
+				swagBacks['server'] = server;
+				toAdd.push(server);
+
+				var lights = new FlxSprite(-601, -147).loadGraphic(Paths.image(pre+'/lights', suf));
+				lights.scrollFactor.set(1.2, 1.2);
+				lights.antialiasing = antialiasing;
+				swagBacks['lights'] = lights;
+				toAdd.push(lights);
+
+				var orangeLight = new FlxSprite(189, -195).loadGraphic(Paths.image(pre+'/orangeLight', suf));
+				orangeLight.scrollFactor.set(1, 1);
+				orangeLight.antialiasing = antialiasing;
+				swagBacks['orangeLight'] = orangeLight;
+				toAdd.push(orangeLight);
+				
+				var lightgreen = new FlxSprite(-171, 242).loadGraphic(Paths.image(pre+'/lightgreen', suf));
+				lightgreen.scrollFactor.set(1, 1);
+				lightgreen.antialiasing = antialiasing;
+				swagBacks['lightgreen'] = lightgreen;
+				toAdd.push(lightgreen);
+
+				var lightred = new FlxSprite(-101, 560).loadGraphic(Paths.image(pre+'/lightred', suf));
+				lightred.scrollFactor.set(1, 1);
+				lightred.antialiasing = antialiasing;
+				swagBacks['lightred'] = lightred;
+				toAdd.push(lightred);
+				
+				var lightAbove = new FlxSprite(804, -117).loadGraphic(Paths.image(pre+'/lightAbove', suf));
+				lightAbove.scrollFactor.set(1, 1);
+				lightAbove.antialiasing = antialiasing;
+				swagBacks['lightAbove'] = lightAbove;
+				toAdd.push(lightAbove);
+				
+			}
+			// case 'phillystreets':
+			// {
+			// }
 			case 'halloween':
 			{	
 				var halloweenBG = new FlxSprite(-200, -80);

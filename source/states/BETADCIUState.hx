@@ -1,5 +1,6 @@
 package states;
 
+import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.FlxInputText;
@@ -13,6 +14,8 @@ import backend.Song;
 
 import objects.HealthIcon;
 
+import substates.StickerSubState;
+
 using StringTools;
 
 class BETADCIUState extends MusicBeatState
@@ -25,6 +28,7 @@ class BETADCIUState extends MusicBeatState
 
 	var scoreText:FlxText;
 	var enterText:FlxText;
+	var scoreBG:FlxSprite;
 	var diffText:FlxText;
 	var comboText:FlxText;
 	var passwordText:FlxInputText;
@@ -47,6 +51,8 @@ class BETADCIUState extends MusicBeatState
 	var bgManifest:FlxSprite;
 	var bgStorm:FlxSprite;
 
+	var textScale:FlxObject;//testing.
+
 	private static var lastDifficultyName:String = '';
 
 	private var iconArray:Array<HealthIcon> = [];
@@ -54,13 +60,35 @@ class BETADCIUState extends MusicBeatState
 	var intendedColor:Int;
 	var colorTween:FlxTween;
 
+	var stickerSubState:StickerSubState;
+	public function new(?stickers:StickerSubState = null)
+	{
+		super();
+
+		if (stickers != null)
+		{
+		stickerSubState = stickers;
+		}
+	}
+
 	override function create()
 	{
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		textScale = new FlxObject(1, 1, 0, 0);
+
+		//Paths.clearStoredMemory();
+		//Paths.clearUnusedMemory();
 		WeekData.reloadWeekFiles(false, 1);
 
-		persistentUpdate = true;
+		//persistentUpdate = true;
+
+		if (stickerSubState != null){
+			this.persistentUpdate = true;
+			this.persistentDraw = true;
+		
+			openSubState(stickerSubState);
+			stickerSubState.degenStickers();
+		}
+
 
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
@@ -172,7 +200,7 @@ class BETADCIUState extends MusicBeatState
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
+		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
 
@@ -383,6 +411,15 @@ class BETADCIUState extends MusicBeatState
 	{
 		super.update(elapsed);
 
+		grpSongs.forEach(function(e:Alphabet){
+			e.setScale(textScale.x, textScale.y);
+			e.screenCenter(X); 
+
+			for (i in 0...iconArray.length){
+				iconArray[i].scale.set(textScale.x, textScale.y);
+			}
+		});
+
 		if (FlxG.sound.music.volume < 0.7)
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
@@ -498,7 +535,7 @@ class BETADCIUState extends MusicBeatState
 			
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
 			{
-				new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
+				new FlxTimer().start(llll/1000 - 0.3, function(tmr:FlxTimer)
 				{
 					if (FlxG.keys.pressed.ALT){
 						MusicBeatState.switchState(new ChartingState());
@@ -510,18 +547,30 @@ class BETADCIUState extends MusicBeatState
 
 			grpSongs.forEach(function(e:Alphabet){
 				if (e.text != songs[curSelected].songName){
-					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
-					
+					FlxTween.tween(e, {alpha: 0}, 0.2);
+
+					for (i in 0...iconArray.length){
+						if(iconArray[i] != iconArray[curSelected])
+						FlxTween.tween(iconArray[i], {alpha: 0}, 0.4);
+					}
+								
+				}else{
+					FlxFlicker.flicker(e);
+					trace(curSelected);
+
+					FlxTween.tween(textScale, {x: 1.2, y: 1.2}, llll/1000-0.3,{ease: FlxEase.cubeOut});
+					FlxG.sound.music.fadeOut(llll / 1000, 0);
+
+					for (i in [scoreBG, scoreText, diffText, comboText, vitor, neonight, extras]) FlxTween.tween(i, {alpha: 0}, 0.2);
+
+					new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
+					{
 						if (FlxG.keys.pressed.ALT){
 							MusicBeatState.switchState(new ChartingState());
 						}else{
 							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
-					}});
-				}else{
-					FlxFlicker.flicker(e);
-					trace(curSelected);
-					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
+					});
 				}	
 			});
 		}
@@ -622,8 +671,10 @@ class BETADCIUState extends MusicBeatState
 		for (i in 0...iconArray.length)
 		{
 			iconArray[i].alpha = 0.6;
+			iconArray[i].animation.curAnim.curFrame = 0;
 		}
 
+		iconArray[curSelected].animation.curAnim.curFrame = 2; // i hope this don't break anything.
 		iconArray[curSelected].alpha = 1;
 
 		for (item in grpSongs.members)

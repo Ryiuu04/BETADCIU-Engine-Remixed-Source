@@ -55,8 +55,25 @@ class CustomLoading extends MusicBeatState
 
     public var isABETADCIU:Bool = false;
 
+    var canClearCache:Bool = true;
+
+    public function new(?isRestarting:Bool = false)
+	{
+		super();
+
+		if (isRestarting != false)
+		{
+		    canClearCache = false;
+		}
+	}
 	override function create()
 	{
+        if (canClearCache == true){
+            trace('clearing Cache');
+            Paths.clearStoredMemory();
+		    Paths.clearUnusedMemory();
+        }
+            
         persistentUpdate = true;
         FlxG.mouse.visible = false;
 

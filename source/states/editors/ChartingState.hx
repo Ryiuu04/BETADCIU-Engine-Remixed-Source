@@ -127,7 +127,7 @@ class ChartingState extends MusicBeatState
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Stage', "Changes the Stage\nValue 1: Stage's Name\nValue 2:Free value for use with onEvent"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		//['Change Rating Skin', "Value 1: Directory(Must end with a '/')\nValue 2: Skin Suffix(Example: -pixel)"],//TODO: Finish this
+		['Change Rating Skin', "Value 1: Directory(Must end with a '/')\nValue 2: Skin Suffix(Example: -pixel)"],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"]
 	];
 	var curEventSelected:Int = 0;
@@ -3247,7 +3247,7 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), _song.song.toLowerCase() + ".json");
+			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
 		}
 	}
 

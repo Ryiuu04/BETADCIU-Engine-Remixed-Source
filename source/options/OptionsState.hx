@@ -21,12 +21,13 @@ class OptionsState extends MusicBeatState
 	#if debug
 	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
 	#else
-	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay', "Modpack Maker"];
 	#end
 	
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
+	public static var onPlayState:Bool = false;
 	
 	function openSelectedSubstate(label:String) {
 		switch(label) {
@@ -37,6 +38,7 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.NotesSubState());
 			case 'Controls':
 				openSubState(new KeyBindMenu());
+				//openSubState(new options.ControlsSubState());
 			case 'Replays':
 				MusicBeatState.switchState(new states.LoadReplayState());
 			case 'Graphics':
@@ -58,13 +60,14 @@ class OptionsState extends MusicBeatState
 
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
+	var bg:FlxSprite;
 
 	override function create() {
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 
@@ -117,6 +120,9 @@ class OptionsState extends MusicBeatState
 				MainMenuState.mainMusic = false;
 			}*/
 
+		Conductor.changeBPM(110);
+		if (FlxG.sound.music == null) FlxG.sound.playMusic(Paths.music('newMenu'), 0);
+
 		super.create();
 	}
 
@@ -125,8 +131,35 @@ class OptionsState extends MusicBeatState
 		ClientPrefs.saveSettings();
 	}
 
+	static function sectionHitCustom() {  // section hit is not working idk why and im too lazy to fix it so i'll just implement this dumb ass function as a workaround
+		// trace('sectionHit!');
+		if(ClientPrefs.data.camZooms) FlxG.camera.zoom += 0.02;
+	}	
+
+	override function beatHit() {
+		// trace('beatHit!');
+		if (curBeat % 4 == 0) sectionHitCustom();
+
+		if (curBeat % 2 == 0 && ClientPrefs.data.camZooms) {
+			bg.scale.set(1.06, 1.06);
+			bg.updateHitbox();
+			bg.offset.set();
+		}
+	}
+	
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		if (FlxG.sound.music != null) Conductor.songPosition = FlxG.sound.music.time;
+
+		FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * Conductor.bpm / 100), 0, 1));
+
+		if(ClientPrefs.data.camZooms) {
+			var mult:Float = FlxMath.lerp(1, bg.scale.x, Math.max(0, Math.min(1, 1 - (elapsed * 9))));
+			bg.scale.set(mult, mult);
+			bg.updateHitbox();
+			bg.offset.set();
+		}
 
 		if (controls.UP_P) {
 			changeSelection(-1);
@@ -137,7 +170,10 @@ class OptionsState extends MusicBeatState
 
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new states.MainMenuState());
+			if(onPlayState) {
+				LoadingState.loadAndSwitchState(new PlayState());
+				FlxG.sound.music.volume = 0;
+			} else MusicBeatState.switchState(new MainMenuState());
 		}
 
 		if (controls.ACCEPT) {

@@ -11,6 +11,9 @@ import backend.WeekData;
 import backend.Song;
 
 import flixel.effects.FlxFlicker;
+import flixel.FlxObject;
+
+import substates.StickerSubState;
 
 using StringTools;
 
@@ -24,6 +27,7 @@ class FreeplayState extends MusicBeatState
 
 	var scoreText:FlxText;
 	var comboText:FlxText;
+	var scoreBG:FlxSprite;
 	var diffText:FlxText;
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
@@ -38,18 +42,42 @@ class FreeplayState extends MusicBeatState
 	var intendedColor:Int;
 	var colorTween:FlxTween;
 	public var canMove:Bool;
+	var textScale:FlxObject;//testing.
 	private static var lastDifficultyName:String = '';
 
 	public static var vocals:FlxSound = null;
 
+	var stickerSubState:StickerSubState;
+	public function new(?stickers:StickerSubState = null)
+	{
+		super();
+
+		if (stickers != null)
+		{
+		stickerSubState = stickers;
+		}
+	}
+
 	override function create()
 	{
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		textScale = new FlxObject(1, 1, 0, 0);
+
+		//Paths.clearStoredMemory();
+		//Paths.clearUnusedMemory();
 
 		canMove = true;
-		persistentUpdate = true;
+		//persistentUpdate = true;
 		WeekData.reloadWeekFiles(false, 0);
+
+		if (stickerSubState != null){
+			this.persistentUpdate = true;
+			this.persistentDraw = true;
+		
+			openSubState(stickerSubState);
+			stickerSubState.degenStickers();
+		}
+
+
 
 		PlayState.isStoryMode = false;
 
@@ -151,7 +179,7 @@ class FreeplayState extends MusicBeatState
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
+		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
 
@@ -249,6 +277,15 @@ class FreeplayState extends MusicBeatState
 	{
 		super.update(elapsed);
 
+		grpSongs.forEach(function(e:Alphabet){
+			e.setScale(textScale.x, textScale.y);
+			e.screenCenter(X); 
+
+			for (i in 0...iconArray.length){
+				iconArray[i].scale.set(textScale.x, textScale.y);
+			}
+		});
+
 		if (FlxG.sound.music.volume < 0.7)
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
@@ -322,20 +359,31 @@ class FreeplayState extends MusicBeatState
 			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 			grpSongs.forEach(function(e:Alphabet){
 				if (e.text != songs[curSelected].songName){
-					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
-					
-						if (FlxG.keys.pressed.ALT){
-							FlxG.switchState(new ChartingState());
-						}else{
-							LoadingState.loadAndSwitchState(new CustomLoading());
-						}
-					}});
+					FlxTween.tween(e, {alpha: 0}, 0.2);
+
+					for (i in 0...iconArray.length){
+						if(iconArray[i] != iconArray[curSelected])
+						FlxTween.tween(iconArray[i], {alpha: 0}, 0.4);
+					}
 				}else{
 					FlxFlicker.flicker(e);
 					trace(curSelected);
-					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
+
+					FlxTween.tween(textScale, {x: 1.2, y: 1.2}, llll/1000-0.3,{ease: FlxEase.cubeOut});
+					FlxG.sound.music.fadeOut(llll / 1000, 0);
+
+					for (i in [scoreBG, scoreText, diffText, comboText]) FlxTween.tween(i, {alpha: 0}, 0.2);
+
+					new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
+					{
+						if (FlxG.keys.pressed.ALT){
+							MusicBeatState.switchState(new ChartingState());
+						}else{
+							LoadingState.loadAndSwitchState(new CustomLoading());
+						}
+					});
 				}
-			});		
+			});
 		}
 	}
 
