@@ -29,8 +29,9 @@ class CustomFadeTransition extends MusicBeatSubstate
 	var transGradient:FlxSprite;
 
 	var transitionSprite:FlxSprite;
+	var fade:FlxSprite; // totally not stolen from Sonic Legacy
 
-	public function new(duration:Float, isTransIn:Bool)
+	public function new(duration:Float, isTransIn:Bool, ?fadeInstead:Bool=false)
 	{
 		super();
 
@@ -39,33 +40,55 @@ class CustomFadeTransition extends MusicBeatSubstate
 		var width:Int = Std.int(FlxG.width);
 		var height:Int = Std.int(FlxG.height);
 		
-		transitionSprite = new FlxSprite(-2600);
-		transitionSprite.loadGraphic(Paths.image('transition thingy'));
-		transitionSprite.scrollFactor.set(0, 0);
-		add(transitionSprite);
+		if (!fadeInstead) {
+			transitionSprite = new FlxSprite(-2600);
+			transitionSprite.loadGraphic(Paths.image('transition thingy'));
+			transitionSprite.scrollFactor.set(0, 0);
+			add(transitionSprite);
 
-		if (isTransIn)
-		{
-			transitionSprite.x = -620;
+			if (isTransIn)
+			{
+				transitionSprite.x = -620;
 
-			FlxTween.tween(transitionSprite, { x: 1280 }, 0.4, {
-				onComplete: function(twn:FlxTween)
-				{
+				FlxTween.tween(transitionSprite, { x: 1280 }, 0.4, {
+					onComplete: function(twn:FlxTween)
+					{
+						close();
+					}
+				});
+			}
+			else
+			{
+				transitionSprite.x = -2600;
+
+				FlxTween.tween(transitionSprite, { x: -620 }, 0.4, {
+					onComplete: function(twn:FlxTween)
+					{
+						finishCallback();
+					}
+				});
+
+			}
+		} else { // testing fade trans
+			fade = new FlxSprite().makeGraphic(1,1,FlxColor.BLACK);
+			fade.setGraphicSize(width,height);
+			fade.updateHitbox();
+			fade.screenCenter();
+			fade.scrollFactor.set();
+			add(fade);
+
+			if (isTransIn) {
+				fade.alpha = 1;
+				FlxTween.tween(fade,{alpha: 0}, 0.4, {onComplete: Void-> {
 					close();
-				}
-			});
-		}
-		else
-		{
-			transitionSprite.x = -2600;
-
-			FlxTween.tween(transitionSprite, { x: -620 }, 0.4, {
-				onComplete: function(twn:FlxTween)
-				{
+				}});
+			} else {
+				fade.alpha = 0;
+				FlxTween.tween(fade,{alpha: 1}, 0.4, {onComplete: Void-> {
 					finishCallback();
-				}
-			});
-
+				}});
+			}
+	
 		}
 
 		//quick fix for the character editor/stage editor
@@ -73,7 +96,8 @@ class CustomFadeTransition extends MusicBeatSubstate
 		transitionCamera.bgColor.alpha = 0;
 		FlxG.cameras.add(transitionCamera, false);
 
-		transitionSprite.cameras = [transitionCamera];
+		if (!fadeInstead) transitionSprite.cameras = [transitionCamera];
+		else fade.cameras = [transitionCamera];
 		//
 	}
 

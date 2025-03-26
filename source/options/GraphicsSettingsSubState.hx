@@ -52,9 +52,33 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 		option.defaultValue = true;
 
+		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")); //trying to implement this cool thing i found on Sonic Legacy's source code
+		if (maxThreads > 1) {
+			var option:Option = new Option('Multi-thread Loading', //Name
+			"If checked, the engine can use multiple threads to speed up loading times on some songs.\nRecommended to leave on, unless it causes crashing\nWARNING: Doesn't work with GPU Rendering.", //Description
+			'multicoreLoading', //Save data variable name
+			'bool'); //Variable type
+			addOption(option);
+
+			option.defaultValue = false;
+
+			var option:Option = new Option('Loading Threads', //Name
+				'How many threads the game can use to load graphics when using Multi-thread Loading.\nThe maximum amount of threads depends on your processor\nWARNING: Higher count of threads can cause crashes while loading.', //Description
+				'loadingThreads', //Save data variable name
+				'int' //Variable type
+			);
+
+			option.defaultValue = Math.floor(maxThreads/2);
+			option.minValue = 1;
+			option.maxValue = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
+			option.displayFormat = '%v';
+
+			addOption(option);
+		}
+		
 		//I LOVE KADE ENGINE LEGACY!!!
 		var option:Option = new Option('GPU Rendering', //Name
-			'If checked, loads sprites into VRAM on the GPU.', //Description
+			"If checked, loads sprites into VRAM on the GPU.\nWARNING: Doesn't work with Multi-thread Loading.", //Description
 			'useGL', //Save data variable name
 			'bool'); //Variable type
 		addOption(option);

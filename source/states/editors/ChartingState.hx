@@ -616,55 +616,57 @@ class ChartingState extends MusicBeatState
 
 	//KADE ENGINE!!!
 	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0):Void
-	{
-		var newSong = [];
-
-		var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
-		var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
-		trace(millisecadd, totaladdsection);
-		if (millisecadd > 0)
-		{
-			for (i in 0...totaladdsection)
-			{
-				newSong.unshift(newSection());
-			}
-		}
-		for (daSection1 in 0..._song.notes.length)
-		{
-			newSong.push(newSection(16, _song.notes[daSection1].mustHitSection, _song.notes[daSection1].altAnim, _song.notes[daSection1].bfAltAnim));
-		}
-
-		for (daSection in 0...(_song.notes.length))
-		{
-			var aimtosetsection = daSection + Std.int((totaladdsection));
-			if (aimtosetsection < 0)
-				aimtosetsection = 0;
-			newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
-			updateHeads();
-			newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
-			newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
-			// trace("section "+daSection);
-			for (daNote in 0...(_song.notes[daSection].sectionNotes.length))
-			{
-				var newtiming = _song.notes[daSection].sectionNotes[daNote][0] + millisecadd;
-				if (newtiming < 0)
-				{
-					newtiming = 0;
-				}
-				var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
-				_song.notes[daSection].sectionNotes[daNote][0] = newtiming;
-				newSong[futureSection].sectionNotes.push(_song.notes[daSection].sectionNotes[daNote]);
-
-				// newSong.notes[daSection].sectionNotes.remove(_song.notes[daSection].sectionNotes[daNote]);
-			}
-		}
-		// trace("DONE BITCH");
-		_song.notes = newSong;
-		updateGrid();
-		updateSectionUI();
-		updateNoteUI();
-	}
-
+    {
+        var newSong = [];
+    
+        // Calculate the time to shift
+        var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
+        var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
+        trace(millisecadd, totaladdsection);
+    
+        // Copy sections before curSec without modification
+        for (daSection in 0...curSec)
+        {
+            newSong.push(_song.notes[daSection]); // Directly copy unmodified sections
+        }
+    
+        for (daSection in curSec..._song.notes.length)
+        {
+            var aimtosetsection = daSection + totaladdsection;
+            if (aimtosetsection < 0)
+                aimtosetsection = 0;
+    
+            while (newSong.length <= aimtosetsection)
+            {
+                newSong.push(newSection());
+            }
+    
+            newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
+            newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
+            newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
+    
+            for (daNote in _song.notes[daSection].sectionNotes)
+            {
+                var newtiming = daNote[0] + millisecadd;
+                if (newtiming < 0)
+                    newtiming = 0;
+    
+                var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
+    
+                while (newSong.length <= futureSection)
+                {
+                    newSong.push(newSection());
+                }
+    
+                newSong[futureSection].sectionNotes.push([newtiming, daNote[1], daNote[2]]);
+            }
+        }
+    
+        _song.notes = newSong;
+        updateGrid();
+        updateSectionUI();
+        updateNoteUI();
+    }
 	var characters:Array<String>;
 	var stages:Array<String>;
 	var noteStyles:Array<String>;
@@ -1656,7 +1658,7 @@ class ChartingState extends MusicBeatState
 		{
 			lastSection = curSec;
 			autosaveSong();
-			LoadingState.loadAndSwitchState(new EditorPlayState(sectionStartTime()));
+			LoadingState.loadAndSwitchState(new EditorPlayState(sectionStartTime()), true, true);
 		}
 
 		var blockInput:Bool = false;
@@ -1860,7 +1862,7 @@ class ChartingState extends MusicBeatState
 					PlayState.startOnTime = Conductor.songPosition;
 				}
 
-				LoadingState.loadAndSwitchState(new PlayState());
+				LoadingState.loadAndSwitchState(new PlayState(), true, true);
 			}
 	
 			if (FlxG.keys.justPressed.E){	
@@ -3210,13 +3212,13 @@ class ChartingState extends MusicBeatState
 		else
 			PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
 
-		LoadingState.loadAndSwitchState(new ChartingState());	
+		LoadingState.loadAndSwitchState(new ChartingState(), true, true);	
 	}
 
 	function loadAutosave():Void
 	{
 		PlayState.SONG = Song.parseJSONshit(FlxG.save.data.autosave);
-		LoadingState.loadAndSwitchState(new ChartingState());
+		LoadingState.loadAndSwitchState(new ChartingState(), true, true);
 	}
 
 	function autosaveSong():Void

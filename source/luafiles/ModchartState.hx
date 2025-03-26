@@ -577,6 +577,9 @@ class ModchartState
 		PlayState.instance.removeObject(PlayState.instance.Stage);
 		PlayState.instance.destroyObject(PlayState.instance.Stage);
 		
+		// for (key in Paths.currentTrackedAssets.keys()) {
+		// 	trace("cached assets: " + key);
+		// }
 		PlayState.instance.Stage = new Stage(id, false);
 		PlayState.curStage = PlayState.instance.Stage.curStage;
 		PlayState.instance.defaultCamZoom = PlayState.instance.Stage.camZoom;
@@ -1102,6 +1105,11 @@ class ModchartState
 					return;
 				}
 
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.luaSpritesToLoad.push(image);
+					return;
+				}
+
 				tag = tag.replace('.', '');
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
 				if(image != null && image.length > 0) {
@@ -1133,6 +1141,11 @@ class ModchartState
 					return;
 				}
 
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.luaSpritesToLoad.push(image);
+					return;
+				}
+
 				tag = tag.replace('.', '');
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
 				
@@ -1146,6 +1159,11 @@ class ModchartState
 			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
 				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
 					ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.luaSpritesToLoad.push(image);
 					return;
 				}
 
@@ -1189,6 +1207,11 @@ class ModchartState
 					ModpackMaker.luaImageList.push(image);
 				}
 				else{
+					if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+						PlayState.instance.luaSpritesToLoad.push(image);
+						return;
+					}
+		
 					Paths.returnGraphic(image);
 				}
 			});
@@ -1203,6 +1226,11 @@ class ModchartState
 					ModpackMaker.luaSoundList.push(name);
 				}
 				else{
+					if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+						PlayState.instance.luaSoundsToLoad.push(name);
+						return;
+					}
+	
 					Paths.returnSound(path, name);
 				}
 			});
@@ -1219,9 +1247,61 @@ class ModchartState
 					ModpackMaker.luaImageList.push(name);
 				}
 				else{
+					if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+						PlayState.instance.luaSpritesToLoad.push(name);
+						return;
+					}
+		
 					Paths.returnGraphic(name);
 				}
 			});
+
+			Lua_helper.add_callback(lua, "makeFlxAnimateSprite", function(tag:String, ?loadFolder:String = null, ?x:Float = 0, ?y:Float = 0) {
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push(loadFolder);
+				}
+				else{
+					if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+						PlayState.instance.luaSpritesToLoad.push(loadFolder);
+						return;
+					}
+		
+					Paths.returnGraphic(loadFolder);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, folderOrImg:Dynamic, ?spriteJson:Dynamic = null, ?animationJson:Dynamic = null) {
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push(folderOrImg);
+				}
+				else{
+					if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+						PlayState.instance.luaSpritesToLoad.push(folderOrImg);
+						return;
+					}
+		
+					Paths.returnGraphic(folderOrImg);
+				}
+			});	
+
+			Lua_helper.add_callback(lua, "addStageToList", function(id:String) { // use this to manually include your stage on the multicore preloader, since the regular changeStage doesn't work in most of the time
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					trace('stage $id was sent to preload');
+					PlayState.instance.PreloadStage = new Stage(id, true);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
+				PlayState.preloadChar = new Character(0, 0, name);
+				PlayState.instance.startCharacterLua(name);
+
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					trace('character $name was sent to preload');
+					return;
+				}
+			});
+		
 
 			Lua_helper.add_callback(lua, "precacheVideo", function(name:String) {
 				if (ModpackMaker.inModpackMaker){
@@ -1329,10 +1409,15 @@ class ModchartState
 				
 				return true;
 			});
-
+	
 			Lua_helper.add_callback(lua, "playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null) {
 				if (ModpackMaker.inModpackMaker){
 					ModpackMaker.luaSoundList.push(sound);
+				}
+
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.luaSoundsToLoad.push(sound);
+					return;
 				}
 			});
 
@@ -1342,14 +1427,105 @@ class ModchartState
 				return runningScripts;
 			});
 	
+			Lua_helper.add_callback(lua, "changeStage", function(id:String) {
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.stagesToLoad.push(id);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua,"checkDownscroll", function() { // i was going to put this as a empty callback... until my game got upscrolled by a preload script. - Ryiuu
+				return FlxG.save.data.downscroll;
+			});
+
+			Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.charactersToLoad.push(character);
+					return;
+				}
+			});
+	
+			Lua_helper.add_callback(lua, "makeCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) { // just changing some names
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.charactersToLoad.push(character);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua, "changeBFAuto", function(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // just changing some names
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.charactersToLoad.push(id);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua, "changeDadAuto", function(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // just changing some names
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.charactersToLoad.push(id);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua, "changeGFAuto", function(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false) { // just changing some names
+				if (ClientPrefs.data.multicoreLoading && FlxG.state is PlayState) {
+					PlayState.instance.charactersToLoad.push(id);
+					return;
+				}
+			});
+
+			Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, ?arg3:Dynamic = "") {
+				var value1:String = arg1;
+				var value2:String = arg2;
+				var value3:String = arg3;
+				
+				PlayState.instance.triggerEventNote(name, value1, value2, value3);
+			});
+
 			//because we have to add em otherwise it'll only load the first sprite... for most luas. if you set it up where you make the sprites first and then all the formatting stuff ->
 			//then it shouldn't be a problem
-			
-			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation', "makeLuaCharacter", "playAnim", "getMapKeys"];
-			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset", "addClipRect", "addAnimation"];
-			var setCallbacks:Array<String> = ['setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode"];
-			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray", "setGlobalFromScript", "triggerEvent"];
+
+			// i hope this doesn't causes any crashes
+			#if hscript HScript.implement(this); #end
+			SpriteGroupFunctions.implement(this);
+			ReflectionFunctions.implement(this);
+			// TweenFunctions.implement(this);
+			TextFunctions.implement(this);
+			ExtraFunctions.implement(this);
+			CustomSubstate.implement(this);
+			ShaderFunctions.implement(this);
+			DeprecatedFunctions.implement(this);
+
+			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation', "playAnim", "getMapKeys", "runTimer", 'cancelTimer', "doFunction", 'changeDadCharacter', 'changeBoyfriendCharacter',
+			'changeGFCharacter', 'changeDadCharacterBetter', 'changeBoyfriendCharacterBetter', 'changeGFCharacterBetter', 'changeBoyfriendAuto', 'changeStageOffsets',
+			'fileExists', 'toggleCamFilter', 'getVar', 'addLuaScript', 'addHScript', 'removeLuaScript', 'removeHScript', 'closeLuaScript', 'getRunningScripts', 'getRunningHScripts', 'callOnLuas',
+			'callOnHScript', 'callOnScripts', 'callScript', 'getGlobalFromScript', 'animationSwap', 'destroyObject', 'removeGroupObject', 'destroyGroupObject', 'removeLuaSprite', 'removeLuaIcon', 'getSongPosition',
+			'getScrollFactor', 'changeAnimOffset', 'getScared', 'setHealthBarColors', 'setTimeBarColors', 'getDominantColor', 'stopSound', 'pauseSound', 'resumeSound', 'soundFadeIn', 'soundFadeOut',
+			'soundFadeCancel', 'close', 'changeDadIcon', 'changeBFIcon', 'changeIcon', 'softCountdown', 'uncacheObject', 'removeCurrentTrackedAsset', 'removeCurrentTrackedSound', 'resetTrail', 'changeDadIconNew',
+			'changeBFIconNew', 'stopIdle', 'removeObject', 'addObject', 'changeNotes', 'changeNotes2', 'changeIndividualNotes', 'characterZoom', 'shakeCam', 'shakeHUD', 'fadeCam', 'cameraShake', 'objectShake',
+			'cameraFlash', 'cameraFade', 'flashCam', 'flashCamHUD', 'inAndOutCam', 'getCameraX', 'getCameraY', 'addCamZoom', 'addHudZoom', 'changeCamSpeed', 'offCamFollow', 'snapCam', 'resetSnapCam', 'cameraSnap',
+			'stopCameraEffects', 'miscCamFollow', 'getArrayLength', 'getMapLength', 'getMapKey', 'objectsOverlap', 'playActorAnimation', 'enablePurpleMiss', 'playBGAnimation', 'playBGAnimation2', 'setAltAnim',
+			'flickerSprite', 'stopGFDance', 'isPixel', 'getCameraZoom', 'playStrumAnim', 'startCountdown', 'resetState', 'startSong', 'startDialogue', 'startVideo', 'endSong', 'restartSong', 'exitSong', 'arrayContains',
+			'startCharLua', 'loadSong', 'loadFrames', 'inBetweenColor', 'changeAddedIcon', 'makeLuaIcon', 'changeLuaIcon', 'flipCharacterAnim', 'changeCharacter', 'changeLuaCharacter', 'makeLuaTrail', 'removeLuaTrail',
+			'animExists', 'characterDance', 'getTextFromFile', 'luaSpriteExists', 'luaTextExists', 'luaSoundExists', 'updateHitbox', 'updateHitboxFromGroup', 'removeSpriteAnim', 'stringStartsWith', 'stringEndsWith', 'stringSplit', 'stringTrim',
+			'changeDiscordPresence', 'changeDiscordClientID'];
+
+			// shit was tweening characters on the start of a song lmao
+			var tweenCallbacks:Array<String> = ['doTweenX', 'doTweenY', 'doTweenAngle', 'doTweenAlpha', 'doTweenZoom', 'startTween', 'cancelTween', 'cancelTweensOf', 'doTweenColor', 'doTweenColor2', 'doTweenNum', 'objectColorTween', 'noteTweenX',
+			'noteTweenY', 'noteTweenAngle', 'noteTweenDirection', 'noteTweenAlpha', 'tweenAnglePsych', 'tweenXPsych', 'tweenYPsych', 'tweenZoomPsych', 'tweenScale', 'tweenAlpha', 'tweenColor', 'tweenCameraPos', 'tweenCameraAngle', 'tweenCameraZoom',
+			'tweenHudPos', 'tweenHudAngle', ' tweenHudZoom', 'tweenPos', 'tweenPosQuad', 'tweenPosXAngle', 'tweenPosYAngle', 'tweenAngle', 'tweenCameraPosOut', 'tweenCameraAngleOut', 'tweenCameraZoomOut', 'tweenHudPosOut', 'tweenHudAngleOut',
+			'tweenHudZoomOut', 'tweenPosOut', 'tweenPosXAngleOut', 'tweenPosYAngleOut', 'tweenAngleOut', 'tweenCameraPosIn', 'tweenCameraAngleIn', 'tweenCameraZoomIn', 'tweenHudPosIn', 'tweenHudAngleIn', 'tweenHudZoomIn', 'tweenPosIn', 'tweenPosXAngleIn',
+			'tweenPosYAngleIn', 'tweenAngleIn', 'tweenFadeIn', 'tweenFadeInBG', 'tweenFadeOut', 'tweenFadeOutBG', 'tweenFadeOutOneShot'];	
+
+			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset", "addClipRect", "addAnimation", 'addAnimationBySymbol', 'addAnimationBySymbolIndices'];
+
+			//putting setHealth and minusHealth here because when i put on the numberCallbacks it returns a instant death.
+			var setCallbacks:Array<String> = ['setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setBlendMode",
+			'setGlobalFromScript', 'setOnLuas', 'setOnHScript', 'setOnScripts', 'setVar', 'setDownscroll', 'setHudAngle', 'setHealth','minusHealth', 'setHudPosition', 'getHudX', 'getHudY', 'getPlayerStrumsY',
+			'setCamPosition', 'cameraSetTarget', 'setCamZoom', 'setCamFollow', 'setStrumlineY', 'setMapKey', 'setActorScreenCenter', 'setOffset'];
+
+			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray", "setGlobalFromScript"];
 		
+			otherCallbacks = otherCallbacks.concat(tweenCallbacks);
 			otherCallbacks = otherCallbacks.concat(addCallbacks);
 			otherCallbacks = otherCallbacks.concat(setCallbacks);
 			otherCallbacks = otherCallbacks.concat(shaderCallbacks);
@@ -1361,7 +1537,12 @@ class ModchartState
 				});
 			}
 
-			var numberCallbacks:Array<String> = ["getObjectOrder", "setObjectOrder"];
+			var numberCallbacks:Array<String> = ["getObjectOrder", "setObjectOrder", 'getSoundVolume', 'setSoundVolume', 'getActualSoundVolume', 'getSoundTime', 'setSoundTime', 'getSoundPitch', 'setSoundPitch',
+			'generateNumberFromRange', 'anyNotes', 'getRenderedNoteStrumtime', 'getRenderedNoteParentX', 'getRenderedNoteParentY', 'getRenderedNoteHit', 'getRenderedNoteCalcX' , 'getRenderedNoteX',
+			'getRenderedNoteY', 'getRenderedNotes', 'getRenderedNoteType', 'isSustain', 'isParentSustain', 'getRenderedNoteScaleX', 'setRenderedNotePos', 'setRenderedNoteAlpha', 'setRenderedNoteScale',
+			'getRenderedNoteWidth', 'setRenderedNoteAngle', 'setGraphicSize', 'getMouseX', 'getMouseY', 'setWindowPos', 'getWindowX', 'getWindowY', 'resizeWindow', 'getScreenWidth', 'getScreenHeight', 'getWindowWidth',
+			'getWindowHeight', 'RGBColor', 'getStageXOffsets', 'changeHue', 'changeSaturation', 'changeBrightness', 'changeHSB', 'changeGroupHue', 'changeGroupMemberHue', 'objectColorTransform', 'getColorFromString',
+			'setClipRectAngle', 'setSpriteMask', 'getNotes'];
 
 			for (i in 0...numberCallbacks.length){
 				Lua_helper.add_callback(lua, numberCallbacks[i], function(?val1:String){
@@ -3231,6 +3412,10 @@ class ModchartState
 			Lua_helper.add_callback(lua, "cancelTimer", function(tag:String) {
 				LuaUtils.cancelTimer(tag);
 			});
+
+			Lua_helper.add_callback(lua, "addStageToList", function(id:String) {
+				// this is used for the preload so no need to do anything on the real gameplay
+			});
 	
 			Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
 				var charType:Int = 0;
@@ -3568,6 +3753,29 @@ class ModchartState
 				makeLuaCharacter(tag, character, isPlayer, flipped);
 			});
 	
+			Lua_helper.add_callback(lua, "makeCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) { // just changing some names
+				makeLuaCharacter(tag, character, isPlayer, flipped);
+			});
+	
+			Lua_helper.add_callback(lua, "changeCharacter", function(tag:String, character:String, ?flipped:Bool) {
+				switch(tag.toLowerCase().trim()) {
+					case 'gf' | 'girlfriend' | "2":
+						if (flipped == null) flipped = PlayState.instance.gf.flipMode;
+						changeGFAuto(character, flipped);
+					case 'dad' | "opponent" | "1":
+						if (flipped == null) flipped = PlayState.instance.dad.flipMode;
+						changeDadAuto(character, flipped);
+					case 'boyfriend' | 'bf' | 'player' | "0":
+						if (flipped == null) flipped = PlayState.instance.boyfriend.flipMode;
+						changeBFAuto(character, flipped);	
+					default: 
+						var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+						if (flipped == null && shit != null) flipped = shit.flipMode;
+						if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+						else luaTrace("changeCharacter: " + tag + " doesn't exist!", false, false, FlxColor.RED);		
+				}
+			});
+
 			Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
 				var shit:Character = PlayState.instance.modchartCharacters.get(tag);
 				if(shit != null) makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);

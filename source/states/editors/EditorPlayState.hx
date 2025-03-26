@@ -347,7 +347,7 @@ class EditorPlayState extends MusicBeatState
 	}
 
 	private function endSong() {
-		LoadingState.loadAndSwitchState(new ChartingState());
+		LoadingState.loadAndSwitchState(new ChartingState(), true, true);
 	}
 
 	override function update(elapsed:Float) {
@@ -355,7 +355,7 @@ class EditorPlayState extends MusicBeatState
 		{
 			FlxG.sound.music.pause();
 			vocals.pause();
-			LoadingState.loadAndSwitchState(new ChartingState());
+			LoadingState.loadAndSwitchState(new ChartingState(), true, true);
 		}
 
 		if (startingSong) {

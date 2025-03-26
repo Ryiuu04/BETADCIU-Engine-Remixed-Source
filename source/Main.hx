@@ -22,6 +22,10 @@ import haxe.CallStack;
 import haxe.io.Path;
 #end
 
+#if VIDEOS_ALLOWED 
+import objects.PsychVideoSprite;
+#end
+
 import states.TitleState;
 import PreloadState;
 
@@ -115,6 +119,12 @@ class Main extends Sprite
 
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		#end
+
+		#if desktop
+		@:privateAccess
+		openfl.Lib.application.window.onFocusIn.add(onFocusIn);
+		openfl.Lib.application.window.onFocusOut.add(onFocusOut);
 		#end
 
 		// shader coords fix
@@ -219,4 +229,20 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
+
+	function onFocusOut() {
+		if (Type.getClass(FlxG.state) == PlayState) {
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalPause();
+			#end
+		}
+	}
+
+	function onFocusIn() {
+		if (Type.getClass(FlxG.state) == PlayState) {
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalResume();
+			#end
+		}
+	}
 }

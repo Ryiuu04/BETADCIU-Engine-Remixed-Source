@@ -27,6 +27,7 @@ class MusicBeatState extends FlxUIState
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
+	public static var wasFadeTrans:Bool = false;
 
 	public static var camBeat:FlxCamera;
 
@@ -47,7 +48,7 @@ class MusicBeatState extends FlxUIState
 		super.create();
 
 		if(!skip) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			openSubState(new CustomFadeTransition(0.7, true, wasFadeTrans));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 	}
@@ -139,7 +140,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	//about time I use this
-	public static function switchState(nextState:FlxState) {
+	public static function switchState(nextState:FlxState, ?useAltTrans:Bool=false) {
 		// Custom made Trans in
 		var curState:Dynamic = FlxG.state;
 		var leState:MusicBeatState = curState;
@@ -150,7 +151,8 @@ class MusicBeatState extends FlxUIState
 		#end
 
 		if(!FlxTransitionableState.skipNextTransIn) {
-			leState.openSubState(new CustomFadeTransition(0.6, false));
+			leState.openSubState(new CustomFadeTransition(0.6, false,useAltTrans));
+			wasFadeTrans = useAltTrans;
 			if(nextState == FlxG.state) {
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.resetState();

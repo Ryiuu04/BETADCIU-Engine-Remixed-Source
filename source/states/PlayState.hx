@@ -134,6 +134,30 @@ using StringTools;
 import objects.PsychVideoSprite;
 #end
 
+//yeah im really trying to fix that shitty lag
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+
+
+import sys.thread.Thread;
+
+#if sys
+import sys.FileSystem;
+#end
+
+typedef PreloadResult = {
+	var thread:Thread;
+	var asset:String;
+	@:optional var terminated:Bool;
+}
+
+typedef AssetPreload = {
+	var path:String;
+	@:optional var type:String;
+	@:optional var library:String;
+	@:optional var terminate:Bool;
+}
+
 class PlayState extends MusicBeatState
 {
 	public static var instance:PlayState;
@@ -443,6 +467,12 @@ class PlayState extends MusicBeatState
 
 	public var enabledHolds:Bool = ClientPrefs.data.holdCovers;
 
+	public var charactersToLoad:Array<String> = [];
+	public var stagesToLoad:Array<String> = []; // used for luas.
+	public var notesToLoad:Array<String> = [];
+	public var luaSpritesToLoad:Array<String> = [];
+	public var luaSoundsToLoad:Array<String> = [];
+
 	override public function create()
 	{
 		instance = this;
@@ -629,6 +659,12 @@ class PlayState extends MusicBeatState
 				startCharLuas.push(characters[i]);
 			}
 		}
+
+		// used for the multicore loading thing
+			// charactersToLoad.push(SONG.player1);
+			// charactersToLoad.push(SONG.player2);
+			// charactersToLoad.push(SONG.gfVersion);
+		//
 
 		if (Stage.hideGirlfriend)
 			gfVersion = 'emptygf';
@@ -880,6 +916,206 @@ class PlayState extends MusicBeatState
 		generateSong(SONG.song);
 
 		trace('generated');
+
+		if (ClientPrefs.data.multicoreLoading) { // multicore preload system "borrowed" from Sonic Legacy's source code
+			trace('multicore preload starting');
+
+			if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
+			{
+				var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload" + suf));
+				for (i in 0...characters.length) {
+					var data:Array<String> = characters[i].split(' ');
+					charactersToLoad.push(characters[i]);
+				}
+			}
+
+			if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage" + suf)))
+			{
+				var stages:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage" + suf));
+				for (i in 0...stages.length) {
+					var data:Array<String> = stages[i].split(' ');
+					stagesToLoad.push(stages[i]);
+				}
+			}
+
+			startLuasAsPreload();
+
+			for (stage in stagesToLoad) {
+				PreloadStage = new Stage(stage, true);
+				trace ('Stage Loaded: ' + stage);
+			}
+
+			var shitToLoad:Array<AssetPreload> = [
+				{path: "sick", library: "shared"},
+				{path: "good", library: "shared"},
+				{path: "bad", library: "shared"},
+				{path: "shit", library: "shared"},
+				{path: "notes/NOTE_assets", library: "shared"},
+				{path: "bruhtf", library: "shared"}
+			];
+
+			for (number in 0...10)
+				shitToLoad.push({path: 'num$number'});
+
+			for(character in charactersToLoad){
+				for(data in returnCharacterPreload(character))
+					shitToLoad.push(data);	
+
+				// i don't know why. i don't need to know why. but this just works. and i don't want to touch this code anymore.
+				if (FileSystem.exists(Paths.modFolders('characters/'+character+'.lua')) || Assets.exists(Paths.modFolders('characters/'+character+'.lua'))) {
+					shitToLoad.push({
+						path: '$character',
+						type: 'CHARACTER'
+					});	
+				}
+			}
+
+			shitToLoad.push({
+				path: '${Paths.formatToSongPath(SONG.song)}/Inst',
+				type: 'SONG'
+			});
+
+			if (SONG.needsVoices) {
+				shitToLoad.push({
+					path: '${Paths.formatToSongPath(SONG.song)}/Voices',
+					type: 'SONG'
+				});
+			}
+
+			for(image in luaSpritesToLoad){
+				shitToLoad.push({
+					path: '$image'
+				});
+			}
+
+			for(note in notesToLoad){
+				shitToLoad.push({
+					path: 'notes/$note'
+				});
+			}
+
+			for(sound in luaSoundsToLoad){
+				shitToLoad.push({
+					path: '$sound',
+					type: 'SOUND'
+				});
+			}
+
+			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
+			var dupes:Array<String> = [];
+			for(shit in shitToLoad) {
+				if (dupes.contains(shit.path)) {
+					shitToLoad.remove(shit);
+					trace('heh. just removed a dupe of ${shit.path}. no need to thank me');
+					continue;
+				}
+				dupes.push(shit.path);
+			}
+
+			
+			var threadLimit:Int = ClientPrefs.data.loadingThreads; //Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
+			if(shitToLoad.length>0 && threadLimit > 1){
+				// thanks shubs -neb
+				for(shit in shitToLoad)
+					if(shit.terminate)shit.terminate=false; // do not
+
+				var count = shitToLoad.length;
+
+				if(threadLimit > shitToLoad.length)threadLimit=shitToLoad.length; // only use as many as it needs
+
+				var sprites:Array<FlxSprite> = [];
+				var threads:Array<Thread> = [];
+
+				var finished:Bool = false;
+				trace("loading " + count + " items with " + threadLimit + " threads");
+				var main = Thread.current();
+				var loadIdx:Int = 0;
+				for (i in 0...threadLimit) {
+					var thread:Thread = Thread.create( () -> {
+						while(true){
+							var toLoad:Null<AssetPreload> = Thread.readMessage(true); // get the next thing that should be loaded
+							if(toLoad!=null){
+								if(toLoad.terminate==true)break;
+								// just loads the graphic
+								switch(toLoad.type){
+									case 'SOUND':
+										Paths.returnSound("sounds", toLoad.path, toLoad.library);
+									case 'MUSIC':
+										Paths.returnSound("music", toLoad.path, toLoad.library);
+									case 'SONG':
+										Paths.returnSound("songs", toLoad.path, toLoad.library);
+									case 'CHARACTER': // apparently loading the actual character is better than just precaching the sprite image
+										preloadChar = new Character(0, 0, toLoad.path);
+										preloadChar.alpha = 0.0001;
+										add(preloadChar);
+										sprites.push(preloadChar);
+										startCharacterLua(preloadChar.curCharacter, true);
+										preloadChar.playCommonAnims();
+										preloadChar.destroyAtlas();	
+									case 'STAGE': // not used actually
+										PreloadStage = new Stage(toLoad.path, true);
+									default:
+										var graphic = Paths.returnGraphic(toLoad.path, toLoad.library);
+										if(graphic!=null){
+											var sprite = new FlxSprite().loadGraphic(graphic);
+											sprite.alpha = 0.0001;
+											add(sprite);
+											sprites.push(sprite);
+										}
+								}
+								main.sendMessage({ // send message so that it can get the next thing to load
+									thread: Thread.current(),
+									asset: toLoad,
+									terminated: false
+								});
+							}
+						}
+						main.sendMessage({ // send message so that it can get the next thing to load
+							thread: Thread.current(),
+							asset: '',
+							terminated: true
+						});
+						return;
+					});
+					threads.push(thread);
+				}
+				for(thread in threads)
+					thread.sendMessage(shitToLoad.pop()); // gives the thread the top thing to load
+
+				while(loadIdx < count){
+					var res:Null<PreloadResult> = Thread.readMessage(true); // whenever a thread loads its asset, it sends a message to get a new asset for it to load
+					if(res!=null){
+						if(res.terminated){
+							if(threads.contains(res.thread)){
+								threads.remove(res.thread); // so it wont have a message sent at the end
+							}
+						}else{
+							loadIdx++;
+							if(shitToLoad.length > 0)
+								res.thread.sendMessage(shitToLoad.pop()); // gives the thread the next thing it should load
+							else
+								res.thread.sendMessage({path: '', library:'', terminate: true}); // terminate the thread
+
+						}
+
+					}
+				};
+				trace(loadIdx, count);
+				var idx:Int = 0;
+				for(t in threads){
+					t.sendMessage({path: '', library: '', terminate: true}); // terminate all threads
+					trace("terminating thread " + idx);
+					idx++;
+				}
+
+				finished = true;
+				new FlxTimer().start(0.05, function(_) { // adding this timer so the game can actually render the assets before removing it
+					for(sprite in sprites)
+						remove(sprite);
+				});
+			}
+			trace('multicore preload finished');
+		}
 
 		// add(strumLine);
 
@@ -1290,10 +1526,13 @@ class PlayState extends MusicBeatState
 		callOnScripts('onSectionHit', []);
 	}
 
-	function moveCameraSection():Void {
-		if(SONG.notes[curSection] == null) return;
+	function moveCameraSection(?sec:Null<Int>):Void {
+		if(sec == null) sec = curSection;
+		if(sec < 0) sec = 0;
 
-		if (gf != null && SONG.notes[curSection].gfSection)
+		if(SONG.notes[sec] == null) return;
+
+		if (gf != null && SONG.notes[sec].gfSection)
 		{
 			if (cameraSystem.toLowerCase() == "psych"){
 				camFollow.set(gf.getMidpoint().x, gf.getMidpoint().y);
@@ -1307,11 +1546,11 @@ class PlayState extends MusicBeatState
 		
 			tweenCamIn();
 			callOnScripts('onMoveCamera', ['gf']);
-			(SONG.notes[curSection].mustHitSection ? callOnScripts('playerOneTurn', []) : callOnScripts('playerTwoTurn', []));
+			(SONG.notes[sec].mustHitSection ? callOnScripts('playerOneTurn', []) : callOnScripts('playerTwoTurn', []));
 			return;
 		}
 
-		if (!SONG.notes[curSection].mustHitSection)
+		if (!SONG.notes[sec].mustHitSection)
 		{
 			moveCamera(true);
 			callOnScripts('onMoveCamera', ['dad']);
@@ -1703,9 +1942,13 @@ class PlayState extends MusicBeatState
 				if(Math.isNaN(val2)) val2 = 0;
 
 				isCameraOnForcedPos = false;
-				if(!Math.isNaN(Std.parseFloat(value1)) || !Math.isNaN(Std.parseFloat(value2))) {
+				if(cameraSystem.toLowerCase() == 'kade' && !Math.isNaN(Std.parseFloat(value1)) || !Math.isNaN(Std.parseFloat(value2))) {
 					camFollow.x = val1;
 					camFollow.y = val2;
+					isCameraOnForcedPos = true;
+				} else if (cameraSystem.toLowerCase() == 'psych' && !Math.isNaN(Std.parseFloat(value1)) || !Math.isNaN(Std.parseFloat(value2))) {
+					camFollowPos.x = val1;
+					camFollowPos.y = val2;
 					isCameraOnForcedPos = true;
 				}
 
@@ -1822,7 +2065,7 @@ class PlayState extends MusicBeatState
 		return pressed;
 	}
 
-	public function startCharacterLua(name:String)
+	public function startCharacterLua(name:String, ?preload:Bool=false)
 	{
 		#if LUA_ALLOWED
 		var doPush:Bool = false;
@@ -1846,7 +2089,7 @@ class PlayState extends MusicBeatState
 			{
 				if(lua.scriptName == luaFile) return;
 			}
-			luaArray.push(new ModchartState(luaFile));
+			luaArray.push(new ModchartState(luaFile, preload));
 		}
 		#end
 	}
@@ -2854,6 +3097,7 @@ class PlayState extends MusicBeatState
 		switch(event.event) {
 			case 'Change Character':
 				var charType:Int = 0;
+				var newCharacter:String = event.value2;
 				switch(event.value1.toLowerCase()) {
 					case 'gf' | 'girlfriend' | '1':
 						charType = 2;
@@ -2864,10 +3108,16 @@ class PlayState extends MusicBeatState
 						if(Math.isNaN(charType)) charType = 0;
 				}
 
-				var newCharacter:String = event.value2;
-				preloadChar = new Character(0, 0, newCharacter);
-				startCharacterLua(preloadChar.curCharacter);
-				preloadChar.destroyAtlas();//no way this will fix the problem. | holy shit it did!
+				if (ClientPrefs.data.multicoreLoading) {
+					charactersToLoad.push(newCharacter);
+					startCharacterLua(newCharacter, true);
+				} else { // Old System
+					preloadChar = new Character(0, 0, newCharacter);
+					startCharacterLua(preloadChar.curCharacter);
+					preloadChar.destroyAtlas();//no way this will fix the problem. | holy shit it did!
+					trace ('Character Loaded: ' + event.value2);
+				}
+
 				case 'Change Stage':
 					if (event.value1 == curStage)
 						return;
@@ -3147,7 +3397,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		paused = true;
 		cancelMusicFadeTween();
-		MusicBeatState.switchState(new ChartingState());
+		MusicBeatState.switchState(new ChartingState(), true);
 		chartingMode = true;
 
 		#if desktop
@@ -3642,7 +3892,7 @@ class PlayState extends MusicBeatState
 			callOnScripts('onExitSong', []);
 			persistentUpdate = false;
 
-			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter)))); // so you can access both characters
+			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter))), true); // so you can access both characters
 		}
 
 		if (FlxG.keys.justPressed.TWO)
@@ -5373,6 +5623,8 @@ class PlayState extends MusicBeatState
 			{
 				var data:Array<String> = stuff[i].split(' ');
 
+				notesToLoad.push(data[1]);
+
 				if (sectionNumber == Std.parseInt(data[0])){
 					(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
 				}
@@ -5623,5 +5875,58 @@ class PlayState extends MusicBeatState
 	
 	function inRange(a:Float, b:Float, tolerance:Float){
 		return (a <= b + tolerance && a >= b - tolerance);
+	}
+
+	function startLuasAsPreload() { // making this a function so it doesn't bloat the create function even more
+		// Booting the luas as preload scripts so the preloader can load it assets too
+		#if LUA_ALLOWED
+		//DATA SCRIPTS
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/' + songName + '/'))
+		{
+			if(FileSystem.exists(folder)){
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if(file.toLowerCase().endsWith('.lua')){
+						if (file == 'script.lua') //making sure it's the first one;
+							luaArray.insert(0, new ModchartState(folder + file, true));
+						else
+							luaArray.push(new ModchartState(folder + file, true));
+					}
+				}
+			}
+		}
+		// "GLOBAL" SCRIPTS
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/')){
+			if(FileSystem.exists(folder)){
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if(file.toLowerCase().endsWith('.lua'))
+						luaArray.push(new ModchartState(folder + file, true));
+				}
+			}
+		}
+		
+		for (lua in luaArray) {
+			lua.call('onCreate', []);
+			// lua.call('onCreatePost', []); // to the scripts that builds it assets on the onCreatePost -- update: using this here crashes the game. i'll comment that ti'll i find a fix for it
+			lua.call('onDestroy', []);
+			lua.stop();
+		}
+
+		luaArray = [];
+		ModchartState.customFunctions.clear();
+		#end
+	}
+
+	function returnCharacterPreload(characterName:String):Array<AssetPreload>{
+		var char = Character.getCharacterFile(characterName);
+		var name:String = 'icons/' + char.healthicon;
+		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of psych engine's support
+		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
+
+		return [
+			{path: char.image}, // spritesheet
+			{path: name} // icon
+		];
 	}
 }
